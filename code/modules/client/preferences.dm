@@ -163,6 +163,9 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	///What outfit typepaths we've favorited in the SelectEquipment menu
 	var/list/favorite_outfits = list()
 
+	var/iconsent = FALSE
+	var/he_knows = FALSE
+
 /datum/preferences/New(client/C)
 	parent = C
 
@@ -210,6 +213,11 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 /datum/preferences/proc/ShowChoices(mob/user)
 	if(!user || !user.client)
 		return
+	if(!user.client.prefs.iconsent)
+		user.client << browse(file2text('html/newcomer.html'), "window=newcomer;size=665x525;border=0;can_minimize=0;can_close=0;can_resize=0")
+		to_chat(user.client, span_notice("Необходимо дать согласие, перед тем как вступить в игру."))
+		return FALSE
+
 	if(!MC_RUNNING())
 		to_chat(user, span_info("Сервер всё ещё инициализируется. Подождите..."))
 		return
@@ -1135,7 +1143,9 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	if(href_list["preference"] == "gear")
 		if(href_list["purchase_gear"])
 			var/datum/gear/TG = GLOB.gear_datums[href_list["purchase_gear"]]
-			if(TG.cost < user.client.get_metabalance())
+			if(GLOB.violence_mode_activated)
+				to_chat(user, span_warning("В этом раунде операции с метакэшем запрещены. Ожидайте новый раунд."))
+			else if(TG.cost < user.client.get_metabalance())
 				if(TG.purchase(user.client))
 					purchased_gear += TG.id
 					inc_metabalance(user, (TG.cost * -1), TRUE, "Покупаю [TG.display_name].")

@@ -1509,6 +1509,27 @@
 		/obj/item/stock_parts/micro_laser = 4,
 		/obj/item/stock_parts/scanning_module = 4)
 
+/obj/item/circuitboard/machine/tank_compressor
+	name = "Tank Compressor"
+	greyscale_colors = CIRCUIT_COLOR_SCIENCE
+	build_path = /obj/machinery/atmospherics/components/binary/tank_compressor
+	req_components = list(
+		/obj/item/stack/sheet/plasteel = 5,
+		/obj/item/stock_parts/scanning_module = 4,
+		)
+
+/obj/item/circuitboard/machine/coffeemaker
+	name = "Coffeemaker (Machine Board)"
+	greyscale_colors = CIRCUIT_COLOR_SERVICE
+	build_path = /obj/machinery/coffeemaker
+	req_components = list(
+		/obj/item/stack/sheet/glass = 1,
+		/obj/item/reagent_containers/glass/beaker = 2,
+		/obj/item/stock_parts/water_recycler = 1,
+		/obj/item/stock_parts/capacitor = 1,
+		/obj/item/stock_parts/micro_laser = 1,
+	)
+
 /obj/item/circuitboard/machine/shuttle/engine
 	name = "thruster (Machine Board)"
 	greyscale_colors = CIRCUIT_COLOR_ENGINEERING
@@ -1534,6 +1555,42 @@
 /obj/item/circuitboard/machine/shuttle/heater
 	name = "предзажигатель двигателя"
 	desc = "Направляет энергию в сжатые частицы для приведения в действие присоединенного двигателя."
-	build_path = /obj/machinery/atmospherics/components/unary/shuttle/heater
+	build_path = /obj/machinery/atmospherics/components/unary/shuttle/engine_heater
 	req_components = list(/obj/item/stock_parts/micro_laser = 2,
 		/obj/item/stock_parts/matter_bin = 1)
+
+/obj/item/circuitboard/machine/shuttle/shield
+	name = "shuttle shield generator (Machine Board)"
+	icon_state = "science"
+	build_path = /obj/machinery/power/shuttle_shield_generator
+	req_components = list(
+		/obj/item/stock_parts/capacitor = 2,
+		/obj/item/stock_parts/micro_laser = 1
+	)
+
+/obj/item/circuitboard/machine/plasma_refiner
+	name = "plasma refinery (Machine Board)"
+	build_path = /obj/machinery/atmospherics/components/unary/plasma_refiner
+	req_components = list(
+		/obj/item/stock_parts/micro_laser = 2,
+		/obj/item/stack/sheet/glass = 1,
+		/obj/item/assembly/igniter = 1
+	)
+
+/obj/item/circuitboard/machine/shuttle/engine/ion
+	name = "ion thruster (Machine Board)"
+	build_path = /obj/machinery/shuttle/engine/ion
+	req_components = list(/obj/item/stock_parts/capacitor = 2,
+		/obj/item/stack/cable_coil = 5,
+		/obj/item/stock_parts/micro_laser = 1)
+
+/obj/item/circuitboard/machine/shuttle/engine/ion/burst
+	name = "ion burst thruster (Machine Board)"
+	build_path = /obj/machinery/shuttle/engine/ion/burst
+
+/obj/item/circuitboard/machine/shuttle/capacitor_bank
+	name = "ion thruster capacitor bank (Machine Board)"
+	build_path = /obj/machinery/power/engine_capacitor_bank
+	req_components = list(
+		/obj/item/stock_parts/capacitor = 3,
+		/obj/item/stock_parts/micro_laser = 1)

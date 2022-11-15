@@ -125,7 +125,7 @@
 	throw_speed = 4
 	attack_verb_continuous = list("режет")
 	attack_verb_simple = list("режет")
-	hitsound = 'sound/weapons/bladeslice.ogg'
+	hitsound = 'sound/weapons/stab1.ogg'
 	sharpness = SHARP_EDGED
 
 /obj/item/clothing/glasses/meson/prescription
@@ -170,7 +170,7 @@
 	desc = "Странная комбинация из обычных очков и научного сканера."
 	icon_state = "prescscihud"
 	resistance_flags = NONE
-	armor = list("melee" = 0, "bullet" = 0, "laser" = 0, "energy" = 0, "bomb" = 0, "bio" = 0, "rad" = 0, "fire" = 20, "acid" = 40, "stamina" = 0)
+	armor = list("melee" = 0, "bullet" = 0, "laser" = 0, "energy" = 0, "bomb" = 0, "bio" = 0, "rad" = 0, "fire" = 20, "acid" = 40)
 	vision_correction = 1
 
 /obj/item/clothing/glasses/night
@@ -224,7 +224,7 @@
 	throw_speed = 4
 	attack_verb_continuous = list("режет")
 	attack_verb_simple = list("режет")
-	hitsound = 'sound/weapons/bladeslice.ogg'
+	hitsound = 'sound/weapons/stab1.ogg'
 	sharpness = SHARP_EDGED
 	glass_colour_type = /datum/client_colour/glass_colour/lightgreen
 
@@ -282,7 +282,7 @@
 	throw_speed = 4
 	attack_verb_continuous = list("режет")
 	attack_verb_simple = list("режет")
-	hitsound = 'sound/weapons/bladeslice.ogg'
+	hitsound = 'sound/weapons/stab1.ogg'
 	sharpness = SHARP_EDGED
 
 /obj/item/clothing/glasses/sunglasses/garb/supergarb
@@ -303,7 +303,7 @@
 	throw_speed = 4
 	attack_verb_continuous = list("режет")
 	attack_verb_simple = list("режет")
-	hitsound = 'sound/weapons/bladeslice.ogg'
+	hitsound = 'sound/weapons/stab1.ogg'
 	sharpness = SHARP_EDGED
 	glass_colour_type = /datum/client_colour/glass_colour/orange
 
@@ -537,8 +537,8 @@
 		H.update_sight()
 
 /obj/item/clothing/glasses/osi
-	name = "O.S.I. Sunglasses"
-	desc = "There's no such thing as good news! Just bad news and... weird news.."
+	name = "солнцезащитные очки O.S.I."
+	desc = "У нас вообще нет хороших новостей! Только плохие... и ужасные.."
 	icon_state = "osi_glasses"
 	inhand_icon_state = "osi_glasses"
 

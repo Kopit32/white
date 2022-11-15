@@ -13,6 +13,15 @@
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	invisibility = INVISIBILITY_LIGHTING
 
+	/// List of all turfs currently inside this area. Acts as a filtered bersion of area.contents
+	/// For faster lookup (area.contents is actually a filtered loop over world)
+	/// Semi fragile, but it prevents stupid so I think it's worth it
+	var/list/turf/contained_turfs = list()
+	/// Contained turfs is a MASSIVE list, so rather then adding/removing from it each time we have a problem turf
+	/// We should instead store a list of turfs to REMOVE from it, then hook into a getter for it
+	/// There is a risk of this and contained_turfs leaking, so a subsystem will run it down to 0 incrementally if it gets too large
+	var/list/turf/turfs_to_uncontain = list()
+
 	var/area_flags = VALID_TERRITORY | BLOBS_ALLOWED | UNIQUE_AREA | CULT_PERMITTED
 
 	///Do we have an active fire alarm?
@@ -62,6 +71,8 @@
 	/// This gets overridden to 1 for space in area/.
 	var/always_unpowered = FALSE
 
+	var/obj/machinery/power/apc/apc = null
+
 	var/power_equip = TRUE
 	var/power_light = TRUE
 	var/power_environ = TRUE
@@ -108,9 +119,6 @@
 	var/list/air_vent_info = list()
 	var/list/air_scrub_info = list()
 
-	/// A normally empty cache used to store turf adjacencies for day/night lighting effects.
-	var/list/adjacent_day_night_turf_cache
-
 /**
  * A list of teleport locations
  *
@@ -129,19 +137,15 @@ GLOBAL_LIST_EMPTY(teleportlocs)
  * The returned list of turfs is sorted by name
  */
 /proc/process_teleport_locs()
-	for(var/V in GLOB.sortedAreas)
-		var/area/AR = V
+	for(var/area/AR as anything in get_sorted_areas())
 		if(istype(AR, /area/shuttle) || AR.area_flags & NOTELEPORT)
 			continue
 		if(GLOB.teleportlocs[AR.name])
 			continue
-		if (!AR.contents.len)
+		if (!AR.has_contained_turfs())
 			continue
-		var/turf/picked = AR.contents[1]
-		if (picked && is_station_level(picked.z))
+		if (is_station_level(AR.z))
 			GLOB.teleportlocs[AR.name] = AR
-
-	sortTim(GLOB.teleportlocs, /proc/cmp_text_asc)
 
 /**
  * Called when an area loads
@@ -153,6 +157,7 @@ GLOBAL_LIST_EMPTY(teleportlocs)
 	// rather than waiting for atoms to initialize.
 	if (area_flags & UNIQUE_AREA)
 		GLOB.areas_by_type[type] = src
+	GLOB.areas += src
 	power_usage = new /list(AREA_USAGE_LEN) // Some atoms would like to use power in Initialize()
 	alarm_manager = new(src) // just in case
 	return ..()
@@ -222,6 +227,24 @@ GLOBAL_LIST_EMPTY(teleportlocs)
 			turfs += T
 		map_generator.generate_terrain(turfs, src)
 
+/area/proc/get_contained_turfs()
+	if(length(turfs_to_uncontain))
+		cannonize_contained_turfs()
+	return contained_turfs
+
+/// Ensures that the contained_turfs list properly represents the turfs actually inside us
+/area/proc/cannonize_contained_turfs()
+	// This is massively suboptimal for LARGE removal lists
+	// Try and keep the mass removal as low as you can. We'll do this by ensuring
+	// We only actually add to contained turfs after large changes (Also the management subsystem)
+	// Do your damndest to keep turfs out of /area/space as a stepping stone
+	// That sucker gets HUGE and will make this take actual tens of seconds if you stuff turfs_to_uncontain
+	contained_turfs -= turfs_to_uncontain
+	turfs_to_uncontain = list()
+
+/// Returns TRUE if we have contained turfs, FALSE otherwise
+/area/proc/has_contained_turfs()
+	return length(contained_turfs) - length(turfs_to_uncontain) > 0
 
 /**
  * Register this area as belonging to a z level
@@ -229,7 +252,7 @@ GLOBAL_LIST_EMPTY(teleportlocs)
  * Ensures the item is added to the SSmapping.areas_in_z list for this z
  */
 /area/proc/reg_in_areas_in_z()
-	if(!length(contents))
+	if(!has_contained_turfs())
 		return
 	var/list/areas_in_z = SSmapping.areas_in_z
 	update_areasize()
@@ -252,9 +275,9 @@ GLOBAL_LIST_EMPTY(teleportlocs)
 	if(GLOB.areas_by_type[type] == src)
 		GLOB.areas_by_type[type] = null
 	GLOB.sortedAreas -= src
+	GLOB.areas -= src
 	STOP_PROCESSING(SSobj, src)
 	QDEL_NULL(alarm_manager)
-	clear_adjacent_turfs()
 	return ..()
 
 /**
@@ -501,7 +524,8 @@ GLOBAL_LIST_EMPTY(teleportlocs)
 	always_unpowered = FALSE
 	area_flags &= ~VALID_TERRITORY
 	area_flags &= ~BLOBS_ALLOWED
-	addSorted()
+	require_area_resort()
+
 /**
  * Set the area size of the area
  *
@@ -512,7 +536,7 @@ GLOBAL_LIST_EMPTY(teleportlocs)
 	if(outdoors)
 		return FALSE
 	areasize = 0
-	for(var/turf/open/T in contents)
+	for(var/turf/open/T in get_contained_turfs())
 		areasize++
 
 /**
@@ -528,144 +552,10 @@ GLOBAL_LIST_EMPTY(teleportlocs)
 	CRASH("Bad op: area/drop_location() called")
 
 /// A hook so areas can modify the incoming args (of what??)
-/area/proc/PlaceOnTopReact(list/new_baseturfs, turf/fake_turf_type, flags)
+/area/proc/PlaceOnTopReact(turf/T, list/new_baseturfs, turf/fake_turf_type, flags)
 	return flags
 
 
 /// Called when a living mob that spawned here, joining the round, receives the player client.
 /area/proc/on_joining_game(mob/living/boarder)
 	return
-
-// Day night stuff
-/**
- * This will calculate all adjacent turfs in this area and add them to a cache for lighting effects.
- *
- * WARNING: This proc is VERY expensive and should be used sparingly.
- */
-/area/proc/initialize_day_night_adjacent_turfs()
-	LAZYCLEARLIST(adjacent_day_night_turf_cache)
-	LAZYINITLIST(adjacent_day_night_turf_cache)
-
-	for(var/turf/iterating_turf in contents)
-		var/bitfield = NONE
-		for(var/bit_step in ALL_JUNCTION_DIRECTIONS)
-			var/turf/target_turf
-			switch(bit_step)
-				if(NORTH_JUNCTION)
-					target_turf = locate(iterating_turf.x, iterating_turf.y + 1, iterating_turf.z)
-				if(SOUTH_JUNCTION)
-					target_turf = locate(iterating_turf.x, iterating_turf.y - 1, iterating_turf.z)
-				if(EAST_JUNCTION)
-					target_turf = locate(iterating_turf.x + 1, iterating_turf.y, iterating_turf.z)
-				if(WEST_JUNCTION)
-					target_turf = locate(iterating_turf.x - 1, iterating_turf.y, iterating_turf.z)
-				if(NORTHEAST_JUNCTION)
-					if(bitfield & NORTH_JUNCTION || bitfield & EAST_JUNCTION)
-						continue
-					target_turf = locate(iterating_turf.x + 1, iterating_turf.y + 1, iterating_turf.z)
-				if(SOUTHEAST_JUNCTION)
-					if(bitfield & SOUTH_JUNCTION || bitfield & EAST_JUNCTION)
-						continue
-					target_turf = locate(iterating_turf.x + 1, iterating_turf.y - 1, iterating_turf.z)
-				if(SOUTHWEST_JUNCTION)
-					if(bitfield & SOUTH_JUNCTION || bitfield & WEST_JUNCTION)
-						continue
-					target_turf = locate(iterating_turf.x - 1, iterating_turf.y - 1, iterating_turf.z)
-				if(NORTHWEST_JUNCTION)
-					if(bitfield & NORTH_JUNCTION || bitfield & WEST_JUNCTION)
-						continue
-					target_turf = locate(iterating_turf.x - 1, iterating_turf.y + 1, iterating_turf.z)
-			if(!target_turf)
-				continue
-			var/area/target_area = target_turf.loc
-			if(target_area == src)
-				continue
-			if(!target_area.outdoors || target_area.underground)
-				continue
-			bitfield ^= bit_step
-
-		if(!bitfield)
-			continue
-		adjacent_day_night_turf_cache[iterating_turf] = list(DAY_NIGHT_TURF_INDEX_BITFIELD, DAY_NIGHT_TURF_INDEX_APPEARANCE)
-		adjacent_day_night_turf_cache[iterating_turf][DAY_NIGHT_TURF_INDEX_BITFIELD] = bitfield
-		RegisterSignal(iterating_turf, COMSIG_PARENT_QDELETING, .proc/clear_adjacent_turf)
-		if(iterating_turf.lighting_object)
-			iterating_turf.lighting_object.day_night_area = src
-
-	UNSETEMPTY(adjacent_day_night_turf_cache)
-
-/**
- * Completely clears any adjacent turfs from the area while removing the effect.
- */
-/area/proc/clear_adjacent_turfs()
-	for(var/turf/iterating_turf as anything in adjacent_day_night_turf_cache)
-		clear_adjacent_turf(iterating_turf)
-	adjacent_day_night_turf_cache = null
-
-/**
- * Clears a signle turf from the adjacency turf cache.
- * Arguments:
- * * turf_to_clear - The turf we will unregister with and clear of any effects.
- */
-/area/proc/clear_adjacent_turf(turf/turf_to_clear)
-	SIGNAL_HANDLER
-
-	turf_to_clear.underlays -= adjacent_day_night_turf_cache[turf_to_clear][DAY_NIGHT_TURF_INDEX_APPEARANCE]
-	adjacent_day_night_turf_cache -= turf_to_clear
-	UnregisterSignal(turf_to_clear, COMSIG_PARENT_QDELETING)
-
-/**
- * A handler to set all adjacent turfs to the correct lighting.
- */
-/area/proc/apply_day_night_turfs(datum/day_night_controller/incoming_controller)
-	SIGNAL_HANDLER
-
-	if(!incoming_controller)
-		return
-
-	for(var/turf/iterating_turf as anything in adjacent_day_night_turf_cache)
-		iterating_turf.underlays -= adjacent_day_night_turf_cache[iterating_turf][DAY_NIGHT_TURF_INDEX_APPEARANCE]
-		var/mutable_appearance/appearance_to_add = mutable_appearance(
-			'icons/effects/daynight_blend.dmi',
-			"[adjacent_day_night_turf_cache[iterating_turf][DAY_NIGHT_TURF_INDEX_BITFIELD]]",
-			DAY_NIGHT_LIGHTING_LAYER,
-			LIGHTING_PLANE,
-			incoming_controller.current_light_alpha,
-			RESET_COLOR | RESET_ALPHA | RESET_TRANSFORM
-			)
-		appearance_to_add.color = incoming_controller.current_light_color
-		if(incoming_controller.current_luminosity)
-			iterating_turf.luminosity = incoming_controller.current_luminosity
-		iterating_turf.underlays += appearance_to_add
-		adjacent_day_night_turf_cache[iterating_turf][DAY_NIGHT_TURF_INDEX_APPEARANCE] = appearance_to_add
-
-/**
- * Used to update the area regarding day and night adjacency turfs.
- *
- * Use this to update the area if changes need to be made.
- * Arguments:
- * * initialize_turfs - This will call the expensive proc initialize_day_night_adjacent_turfs, recalculating all of the turfs after clearing them.
- * * search_for_controller - This will make us look for a controller in our new z-level, and set us up to it if needed.
- * * new_light_color & new_light_alpha - Incoming parameters to apply an update to lighting.
- */
-/area/proc/update_day_night_turfs(initialize_turfs = FALSE, search_for_controller = FALSE, datum/day_night_controller/incoming_controller)
-	if(search_for_controller)
-		for(var/datum/day_night_controller/iterating_controller in SSday_night.cached_controllers)
-			if(iterating_controller.affected_z_level == z)
-				if(outdoors)
-					iterating_controller.register_affected_area(src)
-				else
-					iterating_controller.register_unaffected_area(src)
-	if(initialize_turfs)
-		if(adjacent_day_night_turf_cache)
-			clear_adjacent_turfs()
-		initialize_day_night_adjacent_turfs()
-	if(incoming_controller)
-		apply_day_night_turfs(incoming_controller)
-
-/// Gets an areas virtual z value. For having multiple areas on the same z-level treated mechanically as different z-levels
-/area/proc/get_virtual_z(turf/T)
-	return T.z
-
-/area/get_virtual_z_level()
-	return get_virtual_z(get_turf(src))

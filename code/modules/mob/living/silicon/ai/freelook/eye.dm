@@ -82,6 +82,12 @@
 	var/turf/upperright = locate(min(world.maxx, lowerleft.x + (view[1] - 1)), min(world.maxy, lowerleft.y + (view[2] - 1)), lowerleft.z)
 	return block(lowerleft, upperright)
 
+/// Used in cases when the eye is located in a movable object (i.e. mecha)
+/mob/camera/ai_eye/proc/update_visibility()
+	SIGNAL_HANDLER
+	if(use_static)
+		ai.camera_visibility(src)
+
 // Use this when setting the aiEye's location.
 // It will also stream the chunk that the new loc is in.
 
@@ -201,7 +207,7 @@
 	all_eyes += eyeobj
 	eyeobj.ai = src
 	eyeobj.setLoc(loc)
-	eyeobj.name = "[name] (AI Eye)"
+	eyeobj.name = "[name] (око ИИ)"
 	eyeobj.real_name = eyeobj.name
 	set_eyeobj_visible(TRUE)
 

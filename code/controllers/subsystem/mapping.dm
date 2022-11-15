@@ -1,5 +1,5 @@
 SUBSYSTEM_DEF(mapping)
-	name = "Картография"
+	name = "Mapping"
 	init_order = INIT_ORDER_MAPPING
 	flags = SS_NO_FIRE
 
@@ -50,6 +50,8 @@ SUBSYSTEM_DEF(mapping)
 	var/list/turf/unused_turfs = list()				//Not actually unused turfs they're unused but reserved for use for whatever requests them. "[zlevel_of_turf]" = list(turfs)
 	var/list/datum/turf_reservations		//list of turf reservations
 	var/list/used_turfs = list()				//list of turf = datum/turf_reservation
+	/// List of lists of turfs to reserve
+	var/list/lists_to_reserve = list()
 
 	var/list/reservation_ready = list()
 	var/clearing_reserved_turfs = FALSE
@@ -112,7 +114,7 @@ SUBSYSTEM_DEF(mapping)
 	create_plane_offsets(0, 0)
 	initialize_biomes()
 	loadWorld()
-	repopulate_sorted_areas()
+	require_area_resort()
 	process_teleport_locs()			//Sets up the wizard teleport locations
 	preloadTemplates()
 	run_map_generation()
@@ -164,7 +166,7 @@ SUBSYSTEM_DEF(mapping)
 #endif
 	// Add the transit level
 	transit = add_new_zlevel("Transit/Reserved", list(ZTRAIT_RESERVED = TRUE))
-	repopulate_sorted_areas()
+	require_area_resort()
 	// Set up Z-level transitions.
 	setup_map_transitions()
 	generate_station_area_list()
@@ -174,6 +176,35 @@ SUBSYSTEM_DEF(mapping)
 	// spawn yohei shuttle
 	spawn_type_shuttle(/datum/map_template/shuttle/yohei)
 	return SS_INIT_SUCCESS
+
+/datum/controller/subsystem/mapping/fire(resumed)
+	// Cache for sonic speed
+	var/list/unused_turfs = src.unused_turfs
+	var/list/world_contents = GLOB.areas_by_type[world.area].contents
+	var/list/world_turf_contents = GLOB.areas_by_type[world.area].contained_turfs
+	var/list/lists_to_reserve = src.lists_to_reserve
+	var/index = 0
+	while(index < length(lists_to_reserve))
+		var/list/packet = lists_to_reserve[index + 1]
+		var/packetlen = length(packet)
+		while(packetlen)
+			if(MC_TICK_CHECK)
+				lists_to_reserve.Cut(1, index)
+				return
+			var/turf/T = packet[packetlen]
+			T.empty(RESERVED_TURF_TYPE, RESERVED_TURF_TYPE, null, TRUE)
+			LAZYINITLIST(unused_turfs["[T.z]"])
+			unused_turfs["[T.z]"] |= T
+			var/area/old_area = T.loc
+			old_area.turfs_to_uncontain += T
+			T.flags_1 |= UNUSED_RESERVATION_TURF
+			world_contents += T
+			world_turf_contents += T
+			packet.len--
+			packetlen = length(packet)
+
+		index++
+	lists_to_reserve.Cut(1, index)
 
 /datum/controller/subsystem/mapping/proc/calculate_default_z_level_gravities()
 	for(var/z_level in 1 to length(z_list))
@@ -243,7 +274,7 @@ SUBSYSTEM_DEF(mapping)
 		var/obj/docking_port/stationary/transit/T = i
 		if(!istype(T))
 			continue
-		in_transit[T] = T.get_docked()
+		in_transit[T] = T.docked
 	var/go_ahead = world.time + wipe_safety_delay
 	if(in_transit.len)
 		message_admins("Shuttles in transit detected. Attempting to fast travel. Timeout is [wipe_safety_delay/10] seconds.")
@@ -344,20 +375,19 @@ Used by the AI doomsday and the self-destruct nuke.
 	var/i = 0
 	var/list/datum/space_level/space_levels = list()
 	for (var/level in traits)
-		space_levels += add_new_zlevel("[name][i ? " [i + 1]" : ""]", level)
+		space_levels += add_new_zlevel("[name][i ? " [i + 1]" : ""]", level, contain_turfs = FALSE)
 		++i
 	//Shared orbital body
-	if(orbital_body_type)
-		var/datum/orbital_object/z_linked/orbital_body = new orbital_body_type()
-		for(var/datum/space_level/level as() in space_levels)
-			level.orbital_body = orbital_body
-			orbital_body.link_to_z(level)
+	var/datum/orbital_object/z_linked/orbital_body = new orbital_body_type()
+	for(var/datum/space_level/level as() in space_levels)
+		SSorbits.assoc_z_levels["[level.z_value]"] = orbital_body
+		orbital_body.link_to_z(level)
 
 	// load the maps
-	for (var/P in parsed_maps)
-		var/datum/parsed_map/pm = P
-		if (!pm.load(1, 1, start_z + parsed_maps[P], no_changeturf = TRUE))
+	for(var/datum/parsed_map/pm as() in parsed_maps)
+		if(!pm.load(1, 1, start_z + parsed_maps[pm], no_changeturf = TRUE, new_z = TRUE))
 			errorList |= pm.original_path
+
 	if(!silent)
 		log_world("Map [name] loaded for [(REALTIMEOFDAY - start_time)/10] seconds!")
 		switch(name)
@@ -419,7 +449,7 @@ GLOBAL_LIST_EMPTY(the_station_areas)
 
 /datum/controller/subsystem/mapping/proc/generate_station_area_list()
 	var/list/station_areas_blacklist = typecacheof(list(/area/space, /area/mine, /area/ruin, /area/asteroid/nearstation))
-	for(var/area/A in world)
+	for(var/area/A in GLOB.areas)
 		if (is_type_in_typecache(A, station_areas_blacklist))
 			continue
 		if (!A.contents.len || !(A.area_flags & UNIQUE_AREA))
@@ -432,7 +462,7 @@ GLOBAL_LIST_EMPTY(the_station_areas)
 		log_world("ERROR: Station areas list failed to generate!")
 
 /datum/controller/subsystem/mapping/proc/run_map_generation()
-	for(var/area/A in world)
+	for(var/area/A as anything in GLOB.areas)
 		A.RunGeneration()
 
 /datum/controller/subsystem/mapping/proc/run_map_generation_in_z(desired_z_level)
@@ -724,7 +754,7 @@ GLOBAL_LIST_EMPTY(the_station_areas)
 
 /// Takes a z level datum, and tells the mapping subsystem to manage it
 /// Also handles things like plane offset generation, and other things that happen on a z level to z level basis
-/datum/controller/subsystem/mapping/proc/manage_z_level(datum/space_level/new_z)
+/datum/controller/subsystem/mapping/proc/manage_z_level(datum/space_level/new_z, filled_with_space, contain_turfs = TRUE)
 	// First, add the z
 	z_list += new_z
 
@@ -743,10 +773,25 @@ GLOBAL_LIST_EMPTY(the_station_areas)
 	if(below_offset)
 		update_plane_tracking(new_z)
 
+	if(contain_turfs)
+		build_area_turfs(z_value, filled_with_space)
+
 	// And finally, misc global generation
 
 	// We'll have to update this if offsets change, because we load lowest z to highest z
 	generate_lighting_appearance_by_z(z_value)
+
+/datum/controller/subsystem/mapping/proc/build_area_turfs(z_level, space_guaranteed)
+	// If we know this is filled with default tiles, we can use the default area
+	// Faster
+	if(space_guaranteed)
+		var/area/global_area = GLOB.areas_by_type[world.area]
+		global_area.contained_turfs += Z_TURFS(z_level)
+		return
+
+	for(var/turf/to_contain as anything in Z_TURFS(z_level))
+		var/area/our_area = to_contain.loc
+		our_area.contained_turfs += to_contain
 
 /datum/controller/subsystem/mapping/proc/update_plane_tracking(datum/space_level/update_with)
 	// We're essentially going to walk down the stack of connected z levels, and set their plane offset as we go
@@ -788,8 +833,6 @@ GLOBAL_LIST_EMPTY(the_station_areas)
 	create_plane_offsets(gen_from, new_offset)
 	for(var/offset in gen_from to new_offset)
 		GLOB.fullbright_overlays += create_fullbright_overlay(offset)
-		GLOB.cryo_overlays_cover_on += create_cryo_overlay(offset, "cover-on")
-		GLOB.cryo_overlays_cover_off += create_cryo_overlay(offset, "cover-off")
 
 /datum/controller/subsystem/mapping/proc/create_plane_offsets(gen_from, new_offset)
 	for(var/plane_offset in gen_from to new_offset)

@@ -83,6 +83,8 @@
 
 #define DOOR_CLOSE_WAIT 60 /// Time before a door closes, if not overridden
 
+#define DOOR_VISION_DISTANCE 11 ///The maximum distance a door will see out to
+
 /obj/machinery/door/airlock
 	name = "шлюз"
 	icon = 'icons/obj/doors/airlocks/station/public.dmi'
@@ -143,10 +145,9 @@
 	flags_1 = RAD_PROTECT_CONTENTS_1 | RAD_NO_CONTAMINATE_1 | HTML_USE_INITAL_ICON_1
 	rad_insulation = RAD_MEDIUM_INSULATION
 
-	network_id = NETWORK_DOOR_AIRLOCKS
-
 /obj/machinery/door/airlock/Initialize(mapload)
 	. = ..()
+	init_network_id(NETWORK_DOOR_AIRLOCKS)
 	wires = set_wires()
 	if(frequency)
 		set_frequency(frequency)
@@ -178,38 +179,6 @@
 
 	return INITIALIZE_HINT_LATELOAD
 
-/obj/machinery/door/airlock/LateInitialize()
-	. = ..()
-	if (cyclelinkeddir)
-		cyclelinkairlock()
-	if(abandoned)
-		var/outcome = rand(1,100)
-		switch(outcome)
-			if(1 to 9)
-				var/turf/here = get_turf(src)
-				for(var/turf/closed/T in range(2, src))
-					here.PlaceOnTop(T.type)
-					qdel(src)
-					return
-				here.PlaceOnTop(/turf/closed/wall)
-				qdel(src)
-				return
-			if(9 to 11)
-				lights = FALSE
-				locked = TRUE
-			if(12 to 15)
-				locked = TRUE
-			if(16 to 23)
-				welded = TRUE
-			if(24 to 30)
-				panel_open = TRUE
-	if(cutAiWire)
-		wires.cut(WIRE_AI)
-	if(name == initial(name))
-		name = get_area_name(src, TRUE)
-	update_appearance()
-
-
 /obj/machinery/door/airlock/connect_to_shuttle(obj/docking_port/mobile/port, obj/docking_port/stationary/dock)
 	if(id_tag)
 		id_tag = "[port.id]_[id_tag]"
@@ -228,7 +197,7 @@
 		cyclelinkedairlock = null
 	if (!cyclelinkeddir)
 		return
-	var/limit = world.view
+	var/limit = DOOR_VISION_DISTANCE
 	var/turf/T = get_turf(src)
 	var/obj/machinery/door/airlock/FoundDoor
 	do

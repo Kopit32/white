@@ -8385,12 +8385,12 @@
 /area/maintenance/port/aft)
 "cIv" = (
 /obj/structure/table/reinforced,
-/obj/item/computer_hardware/hard_drive/portable/engineering,
-/obj/item/computer_hardware/hard_drive/portable/engineering,
-/obj/item/computer_hardware/hard_drive/portable/engineering,
-/obj/item/computer_hardware/hard_drive/portable/atmos,
-/obj/item/computer_hardware/hard_drive/portable/atmos,
-/obj/item/computer_hardware/hard_drive/portable/atmos,
+/obj/item/computer_disk/engineering,
+/obj/item/computer_disk/engineering,
+/obj/item/computer_disk/engineering,
+/obj/item/computer_disk/atmos,
+/obj/item/computer_disk/atmos,
+/obj/item/computer_disk/atmos,
 /obj/item/reagent_containers/pill/patch/aiuri,
 /obj/effect/turf_decal/tile/neutral{
 	dir = 4
@@ -22803,7 +22803,7 @@
 	dir = 4
 	},
 /obj/structure/cable,
-/obj/machinery/power/apc/highcap/fifteen_k{
+/obj/machinery/power/apc/highcap/ten_k{
 	areastring = /area/hallway/primary/central;
 	cell_type = /obj/item/stock_parts/cell/bluespace;
 	dir = 4;
@@ -38488,7 +38488,7 @@
 	dir = 8
 	},
 /obj/structure/cable,
-/obj/machinery/power/apc/highcap/fifteen_k{
+/obj/machinery/power/apc/highcap/ten_k{
 	areastring = /area/engineering/gravity_generator;
 	dir = 1;
 	pixel_y = 25
@@ -43114,9 +43114,9 @@
 	dir = 10
 	},
 /obj/structure/table/wood,
-/obj/item/computer_hardware/hard_drive/portable/quartermaster,
-/obj/item/computer_hardware/hard_drive/portable/quartermaster,
-/obj/item/computer_hardware/hard_drive/portable/quartermaster,
+/obj/item/computer_disk/quartermaster,
+/obj/item/computer_disk/quartermaster,
+/obj/item/computer_disk/quartermaster,
 /obj/item/coin/gold,
 /obj/item/reagent_containers/food/drinks/drinkingglass/shotglass{
 	pixel_x = -4;
@@ -43224,7 +43224,7 @@
 /area/maintenance/central/secondary)
 "rwf" = (
 /obj/structure/cable,
-/obj/machinery/power/apc/highcap/fifteen_k{
+/obj/machinery/power/apc/highcap/ten_k{
 	areastring = /area/engineering/engine_smes;
 	dir = 1;
 	pixel_y = 25
@@ -52157,7 +52157,7 @@
 	dir = 4
 	},
 /obj/structure/cable,
-/obj/machinery/power/apc/highcap/fifteen_k{
+/obj/machinery/power/apc/highcap/ten_k{
 	areastring = /area/engineering/main;
 	dir = 1;
 	pixel_y = 25
@@ -55027,7 +55027,7 @@
 	dir = 6
 	},
 /obj/structure/table/reinforced,
-/obj/item/paicard,
+/obj/item/pai_card,
 /obj/machinery/status_display/ai/directional/north,
 /turf/open/floor/plasteel/dark,
 /area/engineering/storage/tech)

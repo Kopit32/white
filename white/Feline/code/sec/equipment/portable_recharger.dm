@@ -20,7 +20,7 @@
 
 /obj/machinery/recharger/internal/powered(chan)
 	return _area_powered() || _cell_powered() || housing.powernet_connection
-		
+
 
 /obj/machinery/recharger/internal/proc/_area_powered(chan = power_channel) //direct copypaste of the original powered() proc
 	if(!loc)
@@ -48,7 +48,7 @@
 	if(_cell_powered()) // if not, tax the battery
 		var/obj/item/stock_parts/cell/C = housing.cell
 		if(C?.use(min(amount*0.625, C.charge))) // slightly more efficient (compared to using powernet) to recharge from a cell - 2.5k cell to fully charge 1k e-gun cell but not 1 to 1 to prevent abuse of upgraded cells
-			return amount 
+			return amount
 	return 0 // hope you brought some spare batteries
 
 // it saddens me to do this it must be done
@@ -102,7 +102,7 @@
 	processing_flags = START_PROCESSING_MANUALLY
 	var/obj/machinery/recharger/internal/left
 	var/obj/machinery/recharger/internal/right
-	
+
 	var/obj/item/stock_parts/cell/cell
 	var/cell_type = /obj/item/stock_parts/cell/high
 
@@ -147,7 +147,7 @@
 	. += span_notice("Левый порт: ")
 	if(left.charging)
 		var/obj/item/stock_parts/cell/C = left.charging.get_cell()
-		. += span_notice("<b>[left.charging.name]</b> заряжен на <b>[C.percent()]%</b>.")	
+		. += span_notice("<b>[left.charging.name]</b> заряжен на <b>[C.percent()]%</b>.")
 	else
 		. += span_notice("<b>Пусто!</b>")
 	. += "<br>"
@@ -164,7 +164,7 @@
 	else
 		. += "Панель техобслуживания закрыта."
 	. += "<hr>"
-	
+
 	if(cell)
 		. += span_notice("Уроверь батареи - <b>[cell.percent()]%</b>.")
 	else
@@ -203,14 +203,14 @@
 		START_PROCESSING(SSmachines, src)
 
 /// used for recharging installed cell when we're connected to a powernet via cable
-/obj/machinery/portable_recharger/process(dt) 
+/obj/machinery/portable_recharger/process(dt)
 	if(!powernet_connection)
 		powernet_connection = null
 		return PROCESS_KILL
 	if(powernet_connection.surplus() >= cell.chargerate * 1.5 * dt)
 		powernet_connection.add_load(cell.chargerate * 1.5 * dt)
 		cell.give(cell.chargerate * dt * 0.5) // shit efficiency - use actual cell chargers, kids
-	
+
 /obj/machinery/portable_recharger/get_cell()
 	return cell
 
@@ -237,14 +237,14 @@
 /obj/machinery/portable_recharger/attackby(obj/item/I, mob/user, params)
 	if(user.a_intent == INTENT_HARM)
 		return ..()
-	
+
 	if(I.tool_behaviour == TOOL_SCREWDRIVER) // check if they're trying to open/close the panel
 		panel_open = !panel_open
 		to_chat(user, span_notice("[panel_open ? "Открываю" : "Закрываю"] панель техобслуживания зарядной станции."))
 		I.play_tool_sound(src, 50)
 		update_icon()
 		return TRUE
-	
+
 	if(istype(I, /obj/item/stock_parts/cell)) // maybe they're trying to insert a battery?
 		var/obj/item/stock_parts/cell/C = I
 		if(!panel_open)
@@ -258,18 +258,18 @@
 		if(!dumbass_check(user))
 			to_chat(user, span_notice("Вставляю батарею в зарядную станцию."))
 		left.power_change()
-		right.power_change() 
+		right.power_change()
 		return TRUE
-	
+
 	if(fully_deployed)
 		var/list/p = params2list(params) // finally, let them access the rechargers
 		var/px = text2num(p["icon-x"])
 		var/py = text2num(p["icon-y"])
 
 		if(IS_IN_RECT(px, py,   5, 7,   -7+16, 2+16))
-			left.attackby(I, user, params)	
+			left.attackby(I, user, params)
 			return TRUE
-		
+
 		if(IS_IN_RECT(px, py,   5, 7,   7+16, 2+16))
 			right.attackby(I, user, params)
 			return TRUE
@@ -283,13 +283,13 @@
 		var/py = text2num(modifiers["icon-y"])
 
 		if(IS_IN_RECT(px, py,   5, 7,   -7+16, 2+16))
-			left.attack_hand(user, modifiers)	
+			left.attack_hand(user, modifiers)
 			return TRUE
-		
-		if(IS_IN_RECT(px, py,   5, 7,   7+16, 2+16)) 
+
+		if(IS_IN_RECT(px, py,   5, 7,   7+16, 2+16))
 			right.attack_hand(user, modifiers)
 			return TRUE
-	
+
 	if(panel_open) //if not, check if the panel is open and let them take the cell out
 		if(cell)
 			cell.forceMove(drop_location())
@@ -302,7 +302,7 @@
 			to_chat(user, span_notice("Батарея зарядной станции отсутствует."))
 
 
-	
+
 /// Returns false if user is not a dumbass. If C is not supplied, the currently installed cell is used.
 /obj/machinery/portable_recharger/proc/dumbass_check(mob/living/carbon/human/user, obj/item/stock_parts/cell/C)
 	var/you_fool = 0
@@ -334,18 +334,13 @@
 	database_id = MEDAL_POPIERDOLILO
 
 /obj/machinery/portable_recharger/proc/punishment(mob/living/carbon/human/user, mul)
-	var/obj/item/bodypart/ouch = user.get_active_hand()
-	if(ouch)
-		ouch.receive_damage(burn = 10*mul)
-	user.electrocution_animation(10)
-	user.AdjustStun(50)
-	user.Jitter(15 * mul)
+	user.electrocute_act(10 * mul, "батарейки зарядника", 1, SHOCK_NOGLOVES & SHOCK_NOSTUN) //accounted for the gloves myself, also applying stun myself
 	playsound(src, "sparks", 50, TRUE)
 	var/msg
 	switch(mul)
 		if(32 to INFINITY)	// using both ports AND wearing very shit insuls AND also discharging a big fucking battery on yourself
-							// honestly you're just asking for trouble at this point 
-			msg = "<font size=+3>О-О-О-О-О-ОХ-ОХХХ К-К-КАК П-П-ПРО-П-ПРОПЕРДОЛИЛО!!</font>" 
+							// honestly you're just asking for trouble at this point
+			msg = "<font size=+3>О-О-О-О-О-ОХ-ОХХХ К-К-КАК П-П-ПРО-П-ПРОПЕРДОЛИЛО!!</font>"
 			user.adjustFireLoss(10*mul)
 			playsound(src.loc, 'sound/magic/lightningbolt.ogg', 50, TRUE, extrarange = 5)
 			var/ass = Beam(user, "lightning[rand(1,12)]") // in case they didn't realise they fucked up big time
@@ -363,7 +358,7 @@
 			msg = "Б-б-б-блять! Надо было вытащить батарейку!"
 		if(0 to 2) // cheap insuls with some protection
 			msg = "Ай! Возможно, не стоит пытаться менять батарейку, пока зарядник используется."
-	to_chat(user, span_userdanger(msg))		
+	to_chat(user, span_userdanger(msg))
 
 /obj/machinery/portable_recharger/MouseDrop(over_object, src_location, over_location)
 	. = ..()
@@ -375,7 +370,7 @@
 		if(isCharging())
 			to_chat(usr, span_warning("Сначала надо вытащить оружие из зарядных портов."))
 			return FALSE
-		
+
 		usr.visible_message(span_notice("[usr] сворачивает зарядную станцию.") , span_notice("Сворачиваю зарядную станцию."))
 		add_fingerprint(usr)
 		do_wrapup_stuff()
@@ -404,7 +399,7 @@
 	force = 15
 	throwforce = 12
 	throw_speed = 2
-	throw_range = 7	
+	throw_range = 7
 	w_class = WEIGHT_CLASS_BULKY
 	custom_materials = list(/datum/material/iron = 500)
 	attack_verb_continuous = list("робастит")
@@ -482,8 +477,6 @@
 	needs_anchored = TRUE
 
 
-
-
 /obj/item/tactical_recharger
 	name = "тактический оружейный зарядник"
 	desc = "Продвинутая переносная зарядная станция для энергетического оружия. Скорость зарядки немного ниже по сравнению с более крупными образцами, однако ее использование все равно значительно расширяет общую потенциальную емкость энергетического оружия."
@@ -497,17 +490,21 @@
 	slot_flags = ITEM_SLOT_SUITSTORE
 	equip_sound = 'sound/items/equip/toolbelt_equip.ogg'
 
+	var/obj/item/stock_parts/cell/cell
+	var/cell_type = /obj/item/stock_parts/cell/high
 	var/cell_imitator_lvl = 2500
 	var/cell_imitator_max = 2500
 	var/chargerate = 250
 
-	var/obj/item/charging = null
+	var/obj/item/held_weapon = null
 	var/using_power = FALSE
 	var/recharge_coeff = 0.5
 
+	var/last_use = 0 // world.time when last used
+	var/cooldown = 800
+
 	var/overlay_state
 	var/mutable_appearance/gun_overlay
-	var/pocket_storage_component_path = /datum/component/storage/concrete/pockets/tactical
 	var/static/list/holdable_weapons_list = list(
 		/obj/item/gun/energy/disabler = "disabler",
 		/obj/item/gun/energy/laser = "laser",
@@ -523,46 +520,27 @@
 		/obj/item/gun/energy/pulse/pistol = "pistol",
 	)
 
-/obj/item/tactical_recharger/examine(mob/user)
-	. = ..()
-	. += "<hr><span class='notice'>Дисплей:</span>"
-	. += "</br><span class='notice'>- Уроверь батареи: <b>[cell_imitator_lvl*100/cell_imitator_max]%</b>.</span>"
-	if(charging)
-		var/obj/item/stock_parts/cell/C = charging.get_cell()
-		. += "</br><span class='notice'>- Заряд оружия: <b>[charging]</b> - <b>[C.percent()]%</b>.</span>"
-//Параметры кармана
-/datum/component/storage/concrete/pockets/tactical_recharger
-	max_items = 1
-	max_w_class = WEIGHT_CLASS_BULKY
-	rustle_sound = FALSE
-	attack_hand_interact = TRUE
-
-//Тип хранимого
-/datum/component/storage/concrete/pockets/tactical_recharger/Initialize(mapload)
-	. = ..()
-	set_holdable(list(/obj/item/gun/energy))
-
-// Инициализация обработки и кармана
 /obj/item/tactical_recharger/Initialize(mapload)
 	. = ..()
-	if(ispath(pocket_storage_component_path))
-		LoadComponent(pocket_storage_component_path)
-	START_PROCESSING(SSmachines, src)
+	cell = new cell_type(src)
+	create_storage(type = /datum/storage/pockets/tactical)
 	update_icon()
 	update_appearance()
 
-// Остановка обработки
-/obj/item/tactical_recharger/Destroy()
-	. = ..()
-	return PROCESS_KILL
+////////////////////////////////////////////////////
+/datum/storage/pockets/tactical
+	max_slots = 1
+	max_specific_storage = WEIGHT_CLASS_BULKY
+	rustle_sound = FALSE
+	attack_hand_interact = TRUE
+////////////////////////////////////////////////////
 
-//Спавн оружия в чехле, пресеты
 /obj/item/tactical_recharger/pulse/Initialize(mapload)
 	. = ..()
 	new /obj/item/gun/energy/pulse(src)
 	update_appearance()
 
-/obj/item/tactical_recharger/disabler/Initialize(mapload)	// Усмиритель - Специалист
+/obj/item/tactical_recharger/disabler/Initialize(mapload)
 	. = ..()
 	new /obj/item/gun/energy/disabler(src)
 	update_appearance()
@@ -572,11 +550,11 @@
 	if(loc != user || user.get_item_by_slot(ITEM_SLOT_SUITSTORE) != src || !user.canUseTopic(src, BE_CLOSE, NO_DEXTERITY, FALSE, TRUE))
 		return ..()
 
-	if(length(contents))
-		var/obj/item/I = contents[1]
-		user.visible_message(span_notice("[user] достаёт из тактического зарядника [I]."), span_notice("Достаю из тактического зарядника [I]."))
-		I.forceMove(get_turf(loc))
-		user.put_in_hands(I)
+	if(held_weapon)
+		//var/obj/item/I = contents[1]
+		user.visible_message(span_notice("[user] достаёт из тактического зарядника [skloname(held_weapon.name, VINITELNI)]."), span_notice("Достаю из тактического зарядника [skloname(held_weapon.name, VINITELNI)]."))
+		user.put_in_hands(held_weapon)
+		held_weapon = null
 		update_appearance()
 		update_icon()
 		user.update_inv_s_store()
@@ -585,17 +563,62 @@
 
 	return ..()
 
-//Изменение картинки в зависимости от содержания
+/obj/item/tactical_recharger/proc/run_check(mob/user, obj/W)
+	. = user.m_intent == MOVE_INTENT_WALK
+	if(!.)
+		to_chat(user, span_alert("У меня не получается зарядить [skloname(W.name, VINITELNI)] на бегу!"))
+
+/obj/item/tactical_recharger/attackby_secondary(obj/item/gun/energy/W, mob/user, params)
+
+	if(!istype(W))
+		return ..()
+
+	if(!W.can_charge)
+		to_chat(user, span_alert("[W.name] не имеет внешнего коннектора для зарядки!"))
+		return
+
+	var/obj/item/stock_parts/cell/target_cell = W.get_cell()
+	if(!target_cell)
+		to_chat(user, span_alert("В [skloname(W.name, PREDLOZHNI)] отсутствует батарея!"))
+		return
+
+	if(!cell)
+		to_chat(user, span_alert("Батарея отсутствует!"))
+		return
+
+	if(cell.charge == 0)
+		to_chat(user, span_alert("Батарея разряжена!"))
+		return
+
+	if(world.time < last_use + cooldown)
+		to_chat(user, span_alert("Конденсаторы тактического зарядника всё ещё остывают!"))
+		return
+
+	var/was_running = user.m_intent == MOVE_INTENT_RUN
+	if(was_running)
+		user.toggle_move_intent()
+
+	if(do_after(user, 30, src, IGNORE_USER_LOC_CHANGE & IGNORE_TARGET_LOC_CHANGE & IGNORE_SLOWDOWNS, extra_checks = CALLBACK(src, .proc/run_check, user, W)))
+		var/target_draw = (target_cell.maxcharge-target_cell.charge) * 2.5
+		var/actual_draw = min(cell.charge,  target_draw)
+		cell.use(actual_draw)
+		target_cell.give(actual_draw / 2.5)
+		to_chat(user, span_notice("[target_draw == actual_draw ? "Полностью" : "Частично" ] заряжаю [skloname(W.name, VINITELNI)]"))
+		new /obj/effect/particle_effect/sparks(get_turf(src))
+		last_use = world.time
+
+	if(was_running)
+		user.toggle_move_intent()
+
 /obj/item/tactical_recharger/update_icon_state()
 	icon_state = initial(icon_state)
 //	worn_icon_state = initial(worn_icon_state)
 	cut_overlay(gun_overlay)
-	if(length(contents))
-		var/obj/item/I = contents[1]
+	if(held_weapon)
 //		worn_icon_state = "full"
-		charging = I
-		if(I.type in holdable_weapons_list)
-			overlay_state = holdable_weapons_list[I.type]
+
+		if(held_weapon.type in holdable_weapons_list)
+			overlay_state = holdable_weapons_list[held_weapon.type]
 			gun_overlay = mutable_appearance(icon, overlay_state)
 			add_overlay(gun_overlay)
 		else
@@ -606,49 +629,46 @@
 //			var/overlay_state = holdable_weapons_list[I.type]
 //			. += mutable_appearance(icon, overlay_state, layer, src, plane, alpha)
 //			icon_state = holdable_weapons_list[I.type]
-	else
-		charging = null
 	return ..()
 
-// Процесс зарядки
-/obj/item/tactical_recharger/process(delta_time)
-	using_power = FALSE
-	if(length(contents))
-		var/obj/item/I = contents[1]
-		charging = I
-	else
-		charging = null
 
-	if(charging)
-		var/obj/item/stock_parts/cell/C = charging.get_cell()
-		if(C)
-			if(C.charge < C.maxcharge)
-				using_power = TRUE
-				if(cell_imitator_lvl > 0)
-					cell_imitator_lvl = cell_imitator_lvl - (C.chargerate * recharge_coeff * delta_time / 2)
-					C.give(C.chargerate * recharge_coeff * delta_time / 2)
-					charging.update_icon()
-				else
-					if(cell_imitator_lvl < 0)	// защита от отрицательных значений
-						cell_imitator_lvl = 0
-	if(cell_imitator_lvl > cell_imitator_max)
-		cell_imitator_lvl = cell_imitator_max
-	update_icon()
+///obj/item/tactical_recharger/process(delta_time)
+//	using_power = FALSE
+//	if(length(contents))
+//		var/obj/item/I = contents[1]
+//		charging = I
+//	else
+//		charging = null
+//
+//	if(charging)
+//		var/obj/item/stock_parts/cell/C = charging.get_cell()
+//		if(C)
+//			if(C.charge < C.maxcharge)
+//				if(cell.use(C.chargerate * recharge_coeff * delta_time / 2))
+//					using_power = TRUE
+//					cell_imitator_lvl = cell_imitator_lvl - (C.chargerate * recharge_coeff * delta_time / 2)
+//					C.give(C.chargerate * recharge_coeff * delta_time / 2)
+//					charging.update_icon()
+//				else
+//					if(cell_imitator_lvl < 0)	// защита от отрицательных значений
+//						cell_imitator_lvl = 0
+//	if(cell_imitator_lvl > cell_imitator_max)
+//		cell_imitator_lvl = cell_imitator_max
+//	update_icon()
 
-//  Оверлеи зарядки
 /obj/item/tactical_recharger/update_overlays()
 	. = ..()
 
-	if(charging)
-		if(using_power)
-			. += mutable_appearance(icon, "toz-charge", layer, src, plane, alpha)
-			. += emissive_appearance(icon, "toz-charge", src)
-		else
-			. += mutable_appearance(icon, "toz-full", layer, src, plane, alpha)
-			. += emissive_appearance(icon, "toz-full", src)
+	if(held_weapon)
+		//if(using_power)
+		//	. += mutable_appearance(icon, "toz-charge", layer, src, plane, alpha)
+		//	. += emissive_appearance(icon, "toz-charge", src)
+		//else
+		. += mutable_appearance(icon, "toz-full", layer, src, plane, alpha)
+		. += emissive_appearance(icon, "toz-full", src)
 
 		var/w_cell_percent
-		var/obj/item/stock_parts/cell/C = charging.get_cell()
+		var/obj/item/stock_parts/cell/C = held_weapon.get_cell()
 		switch(C.percent())
 			if(0 to 10)
 				w_cell_percent = "1"

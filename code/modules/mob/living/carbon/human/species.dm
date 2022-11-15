@@ -681,8 +681,8 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 	H.apply_overlay(HAIR_LAYER)
 
 /datum/species/proc/make_gradient_overlay(file, icon, layer, datum/sprite_accessory/gradient, grad_color)
-	if(!gradient)
-		gradient = pick(GLOB.hair_gradients_list)
+	RETURN_TYPE(/mutable_appearance)
+
 	var/mutable_appearance/gradient_overlay = mutable_appearance(layer = -layer)
 	var/icon/temp = icon(gradient.icon, gradient.icon_state)
 	var/icon/temp_hair = icon(file, icon)
@@ -1214,7 +1214,7 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 				return FALSE
 			return TRUE
 		if(ITEM_SLOT_BACKPACK)
-			if(H.back && SEND_SIGNAL(H.back, COMSIG_TRY_STORAGE_CAN_INSERT, I, H, TRUE))
+			if(H.back && H.back.atom_storage?.can_insert(I, H, messages = TRUE))
 				return TRUE
 			return FALSE
 	return FALSE //Unsupported slot

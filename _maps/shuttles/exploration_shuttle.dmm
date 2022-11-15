@@ -9,6 +9,9 @@
 /obj/machinery/light{
 	dir = 8
 	},
+/obj/machinery/computer/locator{
+	dir = 4
+	},
 /turf/open/floor/mineral/titanium,
 /area/shuttle/exploration)
 "b" = (
@@ -65,6 +68,12 @@
 	},
 /turf/open/floor/mineral/titanium,
 /area/shuttle/exploration)
+"g" = (
+/obj/effect/landmark/exploration_weapon_spawner{
+	dir = 4
+	},
+/turf/closed/wall/mineral/titanium/nodiagonal,
+/area/shuttle/exploration)
 "h" = (
 /obj/machinery/atmospherics/components/unary/vent_scrubber/on/layer2{
 	dir = 8
@@ -88,7 +97,6 @@
 	dir = 1
 	},
 /obj/effect/turf_decal/bot,
-/obj/structure/cable,
 /obj/machinery/power/port_gen/pacman{
 	anchored = 1;
 	sheets = 40
@@ -114,14 +122,16 @@
 /turf/template_noop,
 /area/template_noop)
 "m" = (
-/obj/machinery/modular_computer/console/preset/civilian,
+/obj/machinery/computer/weapons,
 /turf/open/floor/mineral/titanium/white,
 /area/shuttle/exploration)
 "n" = (
 /obj/structure/window/reinforced/survival_pod{
 	dir = 1
 	},
-/obj/structure/shuttle/engine/heater,
+/obj/machinery/atmospherics/components/unary/shuttle/engine_heater{
+	dir = 1
+	},
 /turf/open/floor/plating,
 /area/shuttle/exploration)
 "o" = (
@@ -130,6 +140,7 @@
 	},
 /obj/effect/turf_decal/bot,
 /obj/machinery/telecomms/relay/preset/exploration,
+/obj/machinery/atmospherics/pipe/smart/manifold4w/purple/visible,
 /turf/open/floor/plating,
 /area/shuttle/exploration)
 "p" = (
@@ -188,8 +199,14 @@
 	},
 /turf/open/floor/plating,
 /area/shuttle/exploration)
+"s" = (
+/obj/structure/cable,
+/obj/machinery/atmospherics/pipe/smart/manifold4w/purple/visible,
+/turf/open/floor/mineral/plastitanium,
+/area/shuttle/exploration)
 "t" = (
 /obj/docking_port/mobile{
+	faction_type = /datum/faction/station;
 	dir = 4;
 	dwidth = 5;
 	height = 7;
@@ -306,6 +323,18 @@
 /obj/effect/turf_decal/stripes/line,
 /turf/open/floor/mineral/titanium,
 /area/shuttle/exploration)
+"B" = (
+/obj/effect/landmark/exploration_weapon_spawner{
+	dir = 8
+	},
+/turf/closed/wall/mineral/titanium/nodiagonal,
+/area/shuttle/exploration)
+"C" = (
+/obj/machinery/shuttle/engine/plasma{
+	dir = 1
+	},
+/turf/open/floor/plating,
+/area/shuttle/exploration)
 "D" = (
 /obj/structure/table,
 /obj/machinery/recharger{
@@ -337,8 +366,10 @@
 /turf/open/floor/mineral/titanium,
 /area/shuttle/exploration)
 "G" = (
-/obj/structure/shuttle/engine/propulsion/burst,
-/turf/open/floor/plating,
+/obj/machinery/atmospherics/components/unary/vent_pump/on/layer4{
+	dir = 4
+	},
+/turf/open/floor/mineral/plastitanium,
 /area/shuttle/exploration)
 "H" = (
 /obj/effect/turf_decal/loading_area{
@@ -353,15 +384,15 @@
 /turf/closed/wall/mineral/plastitanium,
 /area/shuttle/exploration)
 "J" = (
-/obj/structure/cable,
-/obj/machinery/atmospherics/components/unary/tank/air{
-	dir = 1;
-	piping_layer = 4
-	},
 /obj/effect/turf_decal/stripes/line{
 	dir = 1
 	},
 /obj/effect/turf_decal/bot,
+/obj/machinery/atmospherics/pipe/smart/manifold4w/purple/visible,
+/obj/machinery/atmospherics/components/unary/tank/air{
+	dir = 1;
+	piping_layer = 4
+	},
 /turf/open/floor/plating,
 /area/shuttle/exploration)
 "K" = (
@@ -377,7 +408,6 @@
 /obj/effect/turf_decal/stripes/line{
 	dir = 1
 	},
-/obj/structure/cable,
 /obj/structure/closet/crate/science,
 /obj/effect/turf_decal/bot,
 /obj/item/circuitboard/computer/exploration_shuttle,
@@ -390,11 +420,13 @@
 /obj/item/clothing/mask/breath,
 /obj/item/clothing/mask/breath,
 /obj/item/clothing/mask/breath,
+/obj/machinery/atmospherics/pipe/smart/manifold4w/purple/visible,
 /turf/open/floor/plating,
 /area/shuttle/exploration)
 "M" = (
 /obj/effect/turf_decal/bot,
 /obj/machinery/camera/autoname,
+/obj/machinery/atmospherics/components/unary/plasma_refiner,
 /turf/open/floor/plating,
 /area/shuttle/exploration)
 "N" = (
@@ -414,9 +446,7 @@
 /obj/effect/turf_decal/stripes/line{
 	dir = 1
 	},
-/obj/machinery/atmospherics/components/unary/vent_pump/on/layer4{
-	dir = 8
-	},
+/obj/machinery/atmospherics/pipe/smart/manifold4w/purple/visible,
 /turf/open/floor/mineral/plastitanium,
 /area/shuttle/exploration)
 "P" = (
@@ -430,6 +460,8 @@
 /obj/machinery/light{
 	dir = 4
 	},
+/obj/machinery/atmospherics/components/unary/portables_connector/visible,
+/obj/machinery/portable_atmospherics/canister/toxins,
 /turf/open/floor/plating,
 /area/shuttle/exploration)
 "R" = (
@@ -474,6 +506,10 @@
 /obj/effect/turf_decal/delivery,
 /turf/open/floor/mineral/titanium/blue,
 /area/shuttle/exploration)
+"Y" = (
+/obj/structure/cable,
+/turf/open/floor/mineral/plastitanium,
+/area/shuttle/exploration)
 "Z" = (
 /obj/effect/turf_decal/bot,
 /obj/machinery/button/door{
@@ -492,7 +528,7 @@ l
 R
 R
 z
-z
+B
 t
 z
 z
@@ -527,10 +563,10 @@ p
 z
 Z
 K
-U
+G
 o
 n
-G
+C
 "}
 (4,1,1) = {"
 R
@@ -545,7 +581,7 @@ N
 b
 J
 n
-G
+C
 "}
 (5,1,1) = {"
 R
@@ -557,10 +593,10 @@ H
 z
 M
 O
-U
+s
 L
 n
-G
+C
 "}
 (6,1,1) = {"
 R
@@ -571,8 +607,8 @@ u
 X
 z
 Q
-V
-U
+O
+Y
 j
 E
 I
@@ -582,7 +618,7 @@ l
 R
 R
 z
-z
+g
 z
 z
 z

@@ -140,7 +140,7 @@
 	throw_range = 5
 	w_class = WEIGHT_CLASS_TINY
 	inhand_icon_state = "beer"
-	hitsound = 'sound/weapons/bladeslice.ogg'
+	hitsound = 'sound/weapons/stab1.ogg'
 	attack_verb_continuous = list("втыкает", "рубит", "атакует")
 	attack_verb_simple = list("втыкает", "рубит", "атакует")
 	sharpness = SHARP_EDGED
@@ -268,15 +268,14 @@
 		LAZYSET(W.data,"vintage",wine_info)
 
 /obj/item/reagent_containers/food/drinks/bottle/wine/proc/generate_vintage()
-	return "[GLOB.year_integer + 540] Nanotrasen Light Red"
+	return "[CURRENT_STATION_YEAR] Nanotrasen Light Red"
 
 /obj/item/reagent_containers/food/drinks/bottle/wine/unlabeled
 	name = "unlabeled wine bottle"
 	desc = "There's no label on this wine bottle."
 
 /obj/item/reagent_containers/food/drinks/bottle/wine/unlabeled/generate_vintage()
-	var/current_year = GLOB.year_integer + 540
-	var/year = rand(current_year-50,current_year)
+	var/year = rand(CURRENT_STATION_YEAR-50, CURRENT_STATION_YEAR)
 	var/type = pick("Sparkling","Dry White","Sweet White","Rich White","Rose","Light Red","Medium Red","Bold Red","Dessert")
 	var/origin = pick("Nanotrasen","Syndicate","Local")
 	return "[year] [origin] [type]"

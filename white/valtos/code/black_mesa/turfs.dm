@@ -18,13 +18,13 @@
 	baseturf = /turf/open/water/xen_acid
 
 /turf/closed/indestructible/rock/xen
-	name = "strange wall"
+	name = "странная стена Зена"
 	color = "#ac3b06"
 	baseturfs = /turf/closed/indestructible/rock/xen
 
 /turf/open/floor/plating/xen
-	name = "strange weeds"
-	desc = "It feels soft to the touch, like a carpet... only... wet."
+	name = "странная трава Зена"
+	desc = "На ощупь как кожистый ковёр"
 	icon = 'white/valtos/icons/black_mesa/xen_turfs.dmi'
 	icon_state = "xen_turf"
 	baseturfs = /turf/open/floor/plating/xen
@@ -33,8 +33,8 @@
 	planetary_atmos = TRUE
 
 /turf/open/water/beach/xen
-	desc = "It's mirky and filled with strange organisms."
-	name = "xen water"
+	desc = "Болотистая вода в которой очень много разных микробов."
+	name = "странная вода Зена"
 	icon_state = "water"
 	icon = 'white/valtos/icons/black_mesa/xen_turfs.dmi'
 	baseturfs = /turf/open/water/beach/xen
@@ -42,31 +42,31 @@
 	planetary_atmos = TRUE
 
 /turf/open/floor/plating/beach/coastline_t/xen
-	desc = "It's mirky and filled with strange organisms."
-	name = "xen water"
+	desc = "Болотистая вода в которой очень много разных микробов."
+	name = "странная вода Зена"
 	icon = 'white/valtos/icons/black_mesa/xen_turfs.dmi'
 	baseturfs = /turf/open/floor/plating/beach/coastline_t/xen
 	initial_gas_mix = OPENTURF_DEFAULT_ATMOS
 	planetary_atmos = TRUE
 
 /turf/open/floor/plating/beach/coastline_t/sandwater_inner/xen
-	desc = "It's mirky and filled with strange organisms."
-	name = "xen water"
+	desc = "Болотистая вода в которой очень много разных микробов."
+	name = "странная вода Зена"
 	icon = 'white/valtos/icons/black_mesa/xen_turfs.dmi'
 	baseturfs = /turf/open/floor/plating/beach/coastline_t/sandwater_inner/xen
 	initial_gas_mix = OPENTURF_DEFAULT_ATMOS
 	planetary_atmos = TRUE
 
 /turf/open/floor/plating/beach/coastline_b/xen
-	name = "xen water"
-	desc = "It's mirky and filled with strange organisms."
+	name = "странная вода Зена"
+	desc = "Болотистая вода в которой очень много разных микробов."
 	icon = 'white/valtos/icons/black_mesa/xen_turfs.dmi'
 	baseturfs = /turf/open/floor/plating/beach/coastline_b/xen
 	initial_gas_mix = OPENTURF_DEFAULT_ATMOS
 	planetary_atmos = TRUE
 
 /turf/open/floor/plating/dirt/planet/xen
-	name = "strange path"
+	name = "земля Зена"
 	color = "#ee5f1c"
 	baseturfs = /turf/open/floor/plating/dirt/planet/xen
 	planetary_atmos = TRUE

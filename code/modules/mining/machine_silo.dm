@@ -205,6 +205,20 @@ GLOBAL_LIST_EMPTY(silo_access_logs)
 	. = ..()
 	. += "<hr><span class='notice'>[capitalize(src.name)] can be linked to techfabs, circuit printers and protolathes with a multitool.</span>"
 
+/obj/machinery/ore_silo/on_object_saved(depth = 0)
+	if(depth >= 10)
+		return ""
+	var/dat
+	var/datum/component/material_container/material_holder = GetComponent(/datum/component/material_container)
+	for(var/each in material_holder.materials)
+		var/amount = material_holder.materials[each] / MINERAL_MATERIAL_AMOUNT
+		var/datum/material/material_datum = each
+		while(amount > 0)
+			var/amount_in_stack = max(1, min(50, amount))
+			amount -= amount_in_stack
+			dat += "[dat ? ",\n" : ""][material_datum.sheet_type]{\n\tamount = [amount_in_stack]\n\t}"
+	return dat
+
 /datum/ore_silo_log
 	var/name  // for VV
 	var/formatted  // for display
@@ -218,7 +232,7 @@ GLOBAL_LIST_EMPTY(silo_access_logs)
 	var/list/materials
 
 /datum/ore_silo_log/New(obj/machinery/M, _action, _amount, _noun, list/mats=list())
-	timestamp = SSday_night.get_twentyfourhour_timestamp()
+	timestamp = station_time_timestamp()
 	machine_name = M.name
 	area_name = get_area_name(M, TRUE)
 	action = _action

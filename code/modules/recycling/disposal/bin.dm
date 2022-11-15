@@ -42,6 +42,7 @@ GLOBAL_VAR_INIT(disposals_are_hungry, FALSE)
 
 	air_contents = new /datum/gas_mixture()
 	//gas.volume = 1.05 * CELLSTANDARD
+	RegisterSignal(src, COMSIG_STORAGE_DUMP_CONTENT, .proc/on_storage_dump)
 	update_icon()
 
 	return INITIALIZE_HINT_LATELOAD //we need turfs to have air
@@ -248,20 +249,23 @@ GLOBAL_VAR_INIT(disposals_are_hungry, FALSE)
 		AM.forceMove(T)
 	..()
 
-/obj/machinery/disposal/get_dumping_location(obj/item/storage/source,mob/user)
-	return src
-
 //How disposal handles getting a storage dump from a storage object
-/obj/machinery/disposal/storage_contents_dump_act(datum/component/storage/src_object, mob/user)
-	. = ..()
-	if(.)
-		return
-	for(var/obj/item/I in src_object.parent)
-		if(user.active_storage != src_object)
-			if(I.on_found(user))
-				return
-		src_object.remove_from_storage(I, src)
-	return TRUE
+/obj/machinery/disposal/proc/on_storage_dump(datum/source, obj/item/storage_source, mob/user)
+	SIGNAL_HANDLER
+
+	. = STORAGE_DUMP_HANDLED
+
+	to_chat(user, span_notice("Вытряхиваю содержимое <b>[storage_source]</b> в <b>[src]</b>."))
+
+	for(var/obj/item/to_dump in storage_source)
+		if(to_dump.loc != storage_source)
+			continue
+		if(user.active_storage != storage_source && to_dump.on_found(user))
+			return
+		if(!storage_source.atom_storage.attempt_remove(to_dump, src, silent = TRUE))
+			continue
+		to_dump.pixel_x = to_dump.base_pixel_x + rand(-5, 5)
+		to_dump.pixel_y = to_dump.base_pixel_y + rand(-5, 5)
 
 // Disposal bin
 // Holds items for disposal into pipe system
@@ -289,10 +293,9 @@ GLOBAL_LIST_EMPTY(disposal_bins)
 /obj/machinery/disposal/bin/attackby(obj/item/I, mob/user, params)
 	if(istype(I, /obj/item/storage/bag/trash))	//Not doing component overrides because this is a specific type.
 		var/obj/item/storage/bag/trash/T = I
-		var/datum/component/storage/STR = T.GetComponent(/datum/component/storage)
 		to_chat(user, span_warning("Опустошаю мешок."))
 		for(var/obj/item/O in T.contents)
-			STR.remove_from_storage(O,src)
+			T.atom_storage.attempt_remove(O,src)
 		T.update_icon()
 		update_icon()
 	else

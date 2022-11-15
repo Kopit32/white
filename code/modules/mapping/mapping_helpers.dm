@@ -10,6 +10,8 @@
 	var/list/baseturf_to_replace
 	var/baseturf
 
+	plane = POINT_PLANE
+
 /obj/effect/baseturf_helper/Initialize(mapload)
 	. = ..()
 	return INITIALIZE_HINT_LATELOAD
@@ -32,12 +34,11 @@
 	qdel(src)
 
 /obj/effect/baseturf_helper/proc/replace_baseturf(turf/thing)
-	if(length(thing.baseturfs))
-		var/list/baseturf_cache = thing.baseturfs.Copy()
+	var/list/baseturf_cache = thing.baseturfs
+	if(length(baseturf_cache))
 		for(var/i in baseturf_cache)
 			if(baseturf_to_replace[i])
 				baseturf_cache -= i
-		thing.baseturfs = baseturfs_string_list(baseturf_cache, thing)
 		if(!baseturf_cache.len)
 			thing.assemble_baseturfs(baseturf)
 		else
@@ -46,8 +47,6 @@
 		thing.assemble_baseturfs(baseturf)
 	else
 		thing.PlaceOnBottom(null, baseturf)
-
-
 
 /obj/effect/baseturf_helper/space
 	name = "space baseturf editor"
@@ -98,7 +97,6 @@
 	..()
 	return late ? INITIALIZE_HINT_LATELOAD : INITIALIZE_HINT_QDEL
 
-
 //airlock helpers
 /obj/effect/mapping_helpers/airlock
 	layer = DOOR_HELPER_LAYER
@@ -108,15 +106,50 @@
 	. = ..()
 	if(!mapload)
 		log_mapping("[src] spawned outside of mapload!")
-		return INITIALIZE_HINT_QDEL
+		return
 
-/obj/effect/mapping_helpers/airlock/LateInitialize()
-	. = ..()
 	var/obj/machinery/door/airlock/airlock = locate(/obj/machinery/door/airlock) in loc
 	if(!airlock)
 		log_mapping("[src] failed to find an airlock at [AREACOORD(src)]")
 	else
 		payload(airlock)
+
+/obj/effect/mapping_helpers/airlock/LateInitialize()
+	. = ..()
+	var/obj/machinery/door/airlock/airlock = locate(/obj/machinery/door/airlock) in loc
+	if(!airlock)
+		qdel(src)
+		return
+	if(airlock.cyclelinkeddir)
+		airlock.cyclelinkairlock()
+	if(airlock.closeOtherId)
+		airlock.update_other_id()
+	if(airlock.abandoned)
+		var/outcome = rand(1,100)
+		switch(outcome)
+			if(1 to 9)
+				var/turf/here = get_turf(src)
+				for(var/turf/closed/T in range(2, src))
+					here.PlaceOnTop(T.type)
+					qdel(src)
+					return
+				here.PlaceOnTop(/turf/closed/wall)
+				qdel(airlock)
+				return
+			if(9 to 11)
+				airlock.lights = FALSE
+				airlock.locked = TRUE
+			if(12 to 15)
+				airlock.locked = TRUE
+			if(16 to 23)
+				airlock.welded = TRUE
+			if(24 to 30)
+				airlock.panel_open = TRUE
+	if(airlock.cutAiWire)
+		airlock.wires.cut(WIRE_AI)
+	if(airlock.name == initial(airlock.name))
+		airlock.name = get_area_name(airlock, TRUE)
+	update_appearance()
 	qdel(src)
 
 /obj/effect/mapping_helpers/airlock/proc/payload(obj/machinery/door/airlock/payload)
@@ -132,6 +165,18 @@
 	else
 		airlock.cyclelinkeddir = dir
 
+/obj/effect/mapping_helpers/airlock/cyclelink_helper_multi
+	name = "airlock multi-cyclelink helper"
+	icon_state = "airlock_multicyclelink_helper"
+	var/cycle_id
+
+/obj/effect/mapping_helpers/airlock/cyclelink_helper_multi/payload(obj/machinery/door/airlock/airlock)
+	if(airlock.closeOtherId)
+		log_mapping("[src] at [AREACOORD(src)] tried to set [airlock] closeOtherId, but it's already set!")
+	else if(!cycle_id)
+		log_mapping("[src] at [AREACOORD(src)] doesn't have a cycle_id to assign to [airlock]!")
+	else
+		airlock.closeOtherId = cycle_id
 
 /obj/effect/mapping_helpers/airlock/locked
 	name = "airlock lock helper"
@@ -142,7 +187,6 @@
 		log_mapping("[src] at [AREACOORD(src)] tried to bolt [airlock] but it's already locked!")
 	else
 		airlock.locked = TRUE
-
 
 /obj/effect/mapping_helpers/airlock/unres
 	name = "airlock unrestricted side helper"
@@ -378,12 +422,14 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	if(note_path && !istype(note_path, /obj/item/paper)) //don't put non-paper in the paper slot thank you
 		log_mapping("[src] at [x],[y] had an improper note_path path, could not place paper note.")
 		qdel(src)
+		return
 	if(locate(/obj/machinery/door/airlock) in turf)
 		var/obj/machinery/door/airlock/found_airlock = locate(/obj/machinery/door/airlock) in turf
 		if(note_path)
 			found_airlock.note = note_path
-			found_airlock.update_icon()
+			found_airlock.update_appearance()
 			qdel(src)
+			return
 		if(note_info)
 			var/obj/item/paper/paper = new /obj/item/paper(src)
 			if(note_name)
@@ -393,8 +439,10 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 			paper.forceMove(found_airlock)
 			found_airlock.update_icon()
 			qdel(src)
+			return
 		log_mapping("[src] at [x],[y] had no note_path or note_info, cannot place paper note.")
 		qdel(src)
+		return
 	log_mapping("[src] at [x],[y] could not find an airlock on current turf, cannot place paper note.")
 	qdel(src)
 
@@ -530,6 +578,7 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	icon = 'icons/turf/damaged.dmi'
 	icon_state = "damaged1"
 	late = TRUE
+	layer = ABOVE_NORMAL_TURF_LAYER
 
 /obj/effect/mapping_helpers/broken_floor/Initialize(mapload)
 	.=..()
@@ -545,6 +594,7 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	icon = 'icons/turf/damaged.dmi'
 	icon_state = "floorscorched1"
 	late = TRUE
+	layer = ABOVE_NORMAL_TURF_LAYER
 
 /obj/effect/mapping_helpers/burnt_floor/Initialize(mapload)
 	.=..()
@@ -562,7 +612,7 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	invisibility = INVISIBILITY_MAXIMUM
 	var/timer = 15
 	var/current_time = null
-	var/current_turf_type = /turf/open/lava
+	var/current_turf_type = /turf/open/water/xen_acid
 
 /obj/effect/mapping_helpers/turf_rotation/Initialize(mapload)
 	.=..()
@@ -574,8 +624,10 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 		qdel(src)
 		return PROCESS_KILL
 	current_time--
-	floor.maptext = MAPTEXT_REALLYBIG_COLOR("[current_time]", "#d10404")
-	if(current_time >= 0)
+	//floor.maptext = MAPTEXT_REALLYBIG_COLOR("[current_time]", "#d10404")
+	if(current_time == 3)
+		new /obj/effect/temp_visual/dz_effects/attention(floor)
+	if(current_time >= 1)
 		return
 	current_time = timer
 	var/old_turf_type = floor.type
@@ -589,3 +641,30 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 /obj/effect/mapping_helpers/turf_rotation/Destroy(force)
 	. = ..()
 	STOP_PROCESSING(SSprocessing, src)
+
+/obj/effect/mapping_helpers/auto_wrench
+	name = "auto wrencher"
+	icon_state = "auto_wrench"
+	late = TRUE
+	invisibility = INVISIBILITY_OBSERVER
+	var/ignore_atmos_pipes = TRUE
+
+/obj/effect/mapping_helpers/auto_wrench/LateInitialize()
+	//Perform our duty and then delete
+	//Give some time for pipenets to build
+	sleep(50)
+	function()
+	return INITIALIZE_HINT_QDEL
+
+/obj/effect/mapping_helpers/auto_wrench/proc/function()
+	//Scuffed
+	var/mob/temp = new(loc)
+	var/obj/item/wrench/magic_wrench = new(loc)
+	for(var/atom/A in loc)
+		if(ignore_atmos_pipes && istype(A, /obj/machinery/atmospherics))
+			continue
+		//For some reason not everything uses wrench_act
+		A.attackby(magic_wrench, temp)
+	qdel(magic_wrench, TRUE)
+	qdel(temp, TRUE)
+	qdel(src, TRUE)

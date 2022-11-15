@@ -857,7 +857,7 @@
 	else if(istype(O, /obj/item/storage/bag/plants))
 		attack_hand(user)
 		for(var/obj/item/food/grown/G in locate(user.x,user.y,user.z))
-			SEND_SIGNAL(O, COMSIG_TRY_STORAGE_INSERT, G, user, TRUE)
+			O.atom_storage?.attempt_insert(G, user, TRUE)
 		return
 
 	else if(default_unfasten_wrench(user, O))
@@ -865,12 +865,12 @@
 
 	else if(istype(O, /obj/item/shovel/spade))
 		if(!myseed && !weedlevel)
-			to_chat(user, span_warning("[capitalize(src.name)] нет никаких растения или сорняков!"))
+			to_chat(user, span_warning("[capitalize(src.name)] не имеет никаких растений или сорняков!"))
 			return
-		user.visible_message(span_notice("[user] выкапывает [src]...") ,
-			span_notice("Выкапываю [src]..."))
+		user.visible_message(span_notice("[user] начинает выкорчёвывать растение из [src]...") ,
+			span_notice("Начинаю выкорчёвывать растение из [src]..."))
 		if(O.use_tool(src, user, 50, volume=50) || (!myseed && !weedlevel))
-			user.visible_message(span_notice("[user] выкапывает [src]!") , span_notice("Выкопал [src]!"))
+			user.visible_message(span_notice("[user] выкорчёвывает растение из [src]!") , span_notice("Выкорчёвываю растение из [src]!"))
 			if(myseed) //Could be that they're just using it as a de-weeder
 				age = 0
 				plant_health = 0

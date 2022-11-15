@@ -7,9 +7,6 @@
  *
  */
 
-
-
-
 /obj/item/multitool
 	name = "мультитул"
 	desc = "Используется для прозвона проводов и подачи импульсов на них. Не рекомендуется врачами."
@@ -33,6 +30,10 @@
 	var/obj/machinery/buffer // simple machine buffer for device linkage
 	var/mode = 0
 
+/obj/item/multitool/Initialize(mapload)
+	. = ..()
+	update_icon()
+
 /obj/item/multitool/examine(mob/user)
 	. = ..()
 	. += "<hr><span class='notice'>Буффер [buffer ? "содержит [buffer]." : "пуст."]</span>"
@@ -41,6 +42,11 @@
 	user.visible_message(span_suicide("[user] puts the [src] to [user.ru_ego()] chest. It looks like [user.p_theyre()] trying to pulse [user.ru_ego()] heart off!"))
 	return OXYLOSS//theres a reason it wasn't recommended by doctors
 
+
+/obj/item/multitool/update_overlays()
+	. = ..()
+	. += mutable_appearance(icon, "[icon_state]_[selected_io ? "red" : "green"]", src)
+	. += emissive_appearance(icon, "[icon_state]_[selected_io ? "red" : "green"]", src, alpha = src.alpha)
 
 // Syndicate device disguised as a multitool; it will turn red when an AI camera is nearby.
 

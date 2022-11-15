@@ -834,8 +834,11 @@
 	spawn_flags = IC_SPAWN_DEFAULT|IC_SPAWN_RESEARCH
 	action_flags = IC_ACTION_LONG_RANGE
 	power_draw_per_use = 50
-	network_id = NETWORK_CARDS
 	var/address
+
+/obj/item/integrated_circuit_old/input/ntnet_packet/Initialize(mapload)
+	. = ..()
+	init_network_id(NETWORK_TABLETS)
 
 /obj/item/integrated_circuit_old/input/ntnet_packet/Initialize(mapload)
 	. = ..()
@@ -996,8 +999,7 @@
 		return FALSE
 	var/ignore_bags = get_pin_data(IC_INPUT, 1)
 	if(ignore_bags)
-		var/datum/component/storage/STR = A.GetComponent(/datum/component/storage)
-		if(STR)
+		if(atom_storage)
 			return FALSE
 	set_pin_data(IC_OUTPUT, 1, WEAKREF(A))
 	push_data()

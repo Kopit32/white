@@ -145,6 +145,7 @@
 /obj/item/clothing/head/helmet/chaplain/witchunter_hat
 	name = "шляпа Охотника на Ведьм"
 	desc = "Эта изношенная шляпа часто применялась в свое время."
+	icon_state = "witchhunterhat"
 	inhand_icon_state = "witchhunterhat"
 	flags_cover = HEADCOVERSEYES
 	flags_inv = null
@@ -359,7 +360,7 @@
 	slot_flags = ITEM_SLOT_BACK|ITEM_SLOT_BELT
 	block_chance = 30
 	sharpness = SHARP_EDGED
-	hitsound = 'sound/weapons/bladeslice.ogg'
+	hitsound = 'sound/weapons/stab1.ogg'
 	block_sounds = list('white/valtos/sounds/block_sword.ogg')
 	attack_verb_continuous = list("атакует", "рубит", "кромсает", "разрывает", "протыкает", "колбасит", "делит", "режет")
 	attack_verb_simple = list("атакует", "рубит", "кромсает", "разрывает", "протыкает", "колбасит", "делит", "режет")
@@ -458,7 +459,7 @@
 	force = 4.13
 	throwforce = 1
 	slot_flags = ITEM_SLOT_BELT
-	hitsound = 'sound/weapons/bladeslice.ogg'
+	hitsound = 'sound/weapons/stab1.ogg'
 	attack_verb_continuous = list("НЕРЕАЛЬНО рубит", "НЕРЕАЛЬНО режет", "НЕРЕАЛЬНО кромсает", "НЕРЕАЛЬНО разрывает", "НЕРЕАЛЬНО протыкает", "НЕРЕАЛЬНО атакует", "НЕРЕАЛЬНО делит", "НЕРЕАЛЬНО колбасит")
 	attack_verb_simple = list("НЕРЕАЛЬНО рубит", "НЕРЕАЛЬНО режет", "НЕРЕАЛЬНО кромсает", "НЕРЕАЛЬНО разрывает", "НЕРЕАЛЬНО протыкает", "НЕРЕАЛЬНО атакует", "НЕРЕАЛЬНО делит", "НЕРЕАЛЬНО колбасит")
 
@@ -754,7 +755,7 @@
 	w_class = WEIGHT_CLASS_HUGE
 	sharpness = SHARP_EDGED
 	slot_flags = null
-	hitsound = 'sound/weapons/bladeslice.ogg'
+	hitsound = 'sound/weapons/stab1.ogg'
 	attack_verb_continuous = list("атакует", "режет", "кромсает", "нарезает", "протыкает", "втыкает", "разрезает", "мясит")
 	attack_verb_simple = list("атакует", "режет", "кромсает", "нарезает", "протыкает", "втыкает", "разрезает", "мясит")
 	item_flags = SLOWS_WHILE_IN_HAND
@@ -787,7 +788,7 @@
 	slot_flags = ITEM_SLOT_BACK
 	attack_verb_continuous = list("насаживает", "пробивает", "втыкает", "макаронит")
 	attack_verb_simple = list("насаживает", "пробивает", "втыкает", "макаронит")
-	hitsound = 'sound/weapons/bladeslice.ogg'
+	hitsound = 'sound/weapons/stab1.ogg'
 	sharpness = SHARP_EDGED
 
 /obj/item/nullrod/egyptian
@@ -834,4 +835,4 @@
 	w_class = WEIGHT_CLASS_HUGE
 	attack_verb_continuous = list("насаживает", "пробивает", "втыкает", "макаронит")
 	attack_verb_simple = list("насаживает", "пробивает", "втыкает", "макаронит")
-	hitsound = 'sound/weapons/bladeslice.ogg'
+	hitsound = 'sound/weapons/stab1.ogg'

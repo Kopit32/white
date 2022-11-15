@@ -1,5 +1,5 @@
 SUBSYSTEM_DEF(air)
-	name = "Гипер-Атмос"
+	name = "Atmospherics"
 	init_order = INIT_ORDER_AIR
 	priority = FIRE_PRIORITY_AIR
 	wait = 0.5 SECONDS
@@ -65,7 +65,7 @@ SUBSYSTEM_DEF(air)
 
 	var/list/atom_process = list()
 
-	var/list/paused_z_levels	//Paused z-levels will not add turfs to active
+	var/list/paused_z_levels = list()	//Paused z-levels will not add turfs to active
 
 /datum/controller/subsystem/air/stat_entry(msg)
 	msg += "C:{"
@@ -455,7 +455,7 @@ SUBSYSTEM_DEF(air)
 	map_loading = FALSE
 
 /datum/controller/subsystem/air/proc/pause_z(z_level)
-	LAZYADD(paused_z_levels, z_level)
+	paused_z_levels["[z_level]"] = TRUE
 	var/list/turfs_to_disable = block(locate(1, 1, z_level), locate(world.maxx, world.maxy, z_level))
 	for(var/turf/T as anything in turfs_to_disable)
 		T.ImmediateDisableAdjacency(FALSE)
@@ -466,16 +466,15 @@ SUBSYSTEM_DEF(air)
 	for(var/turf/T as anything in turfs_to_reinit)
 		T.Initalize_Atmos()
 		CHECK_TICK
-	LAZYREMOVE(paused_z_levels, z_level)
+	paused_z_levels["[z_level]"] = FALSE
 
 /datum/controller/subsystem/air/proc/setup_allturfs()
-	var/list/turfs_to_init = block(locate(1, 1, 1), locate(world.maxx, world.maxy, world.maxz))
 	var/times_fired = ++src.times_fired
 
 	// Clear active turfs - faster than removing every single turf in the world
 	// one-by-one, and Initalize_Atmos only ever adds `src` back in.
 
-	for(var/thing in turfs_to_init)
+	for(var/thing in ALL_TURFS())
 		var/turf/T = thing
 		if (T.blocks_air)
 			continue

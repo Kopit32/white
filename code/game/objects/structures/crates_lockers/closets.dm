@@ -101,6 +101,11 @@
 	)
 	AddElement(/datum/element/connect_loc, loc_connections)
 
+/obj/structure/closet/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
+	. = ..()
+	if(has_gravity())
+		playsound(src, pick('sound/effects/drag1.ogg', 'sound/effects/drag2.ogg'), 60, TRUE)
+
 /obj/structure/closet/proc/create_password()
 	var/pass = ""
 	for(var/i in 1 to 3)
@@ -325,7 +330,7 @@
 			break
 	for(var/i in reverse_range(L.get_all_contents()))
 		var/atom/movable/thing = i
-		SEND_SIGNAL(thing, COMSIG_TRY_STORAGE_HIDE_ALL)
+		thing.atom_storage?.close_all()
 
 /obj/structure/closet/proc/open(mob/living/user, force = FALSE)
 	if(!can_open(user, force))
@@ -910,3 +915,15 @@
 #undef MODE_OPTIONAL
 #undef MODE_CARD
 #undef PASSWORD_LENGHT
+
+/obj/structure/closet/on_object_saved(depth = 0)
+	if(depth >= 10)
+		return ""
+	var/dat = ""
+	for(var/obj/item in contents)
+		var/metadata = generate_tgm_metadata(item)
+		dat += "[dat ? ",\n" : ""][item.type][metadata]"
+		//Save the contents of things inside the things inside us, EG saving the contents of bags inside lockers
+		var/custom_data = item.on_object_saved(depth++)
+		dat += "[custom_data ? ",\n[custom_data]" : ""]"
+	return dat

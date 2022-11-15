@@ -476,6 +476,14 @@
 	construction_time = 40
 	departmental_flags = DEPARTMENTAL_FLAG_SCIENCE
 
+/datum/design/board/tank_compressor
+	name = "Tank Compressor Board"
+	desc = "The circuit board for a tank compressor"
+	id = "tank_compressor"
+	build_path = /obj/item/circuitboard/machine/tank_compressor
+	category = list("Исследовательское оборудование")
+	departmental_flags = DEPARTMENT_BITFLAG_SCIENCE
+
 /datum/design/board/microwave
 	name = "Микроволновка"
 	desc = "Готовит и варит штуки."
@@ -1050,6 +1058,17 @@
 	construction_time = 40
 	departmental_flags = DEPARTMENTAL_FLAG_SCIENCE
 
+/datum/design/board/coffeemaker
+	name = "Coffeemaker Board"
+	desc = "The circuit board for a coffeemaker."
+	id = "coffeemaker"
+	build_path = /obj/item/circuitboard/machine/coffeemaker
+	category = list(
+		"Различное оборудование"
+	)
+	sub_category = list("Машины")
+	departmental_flags = DEPARTMENT_BITFLAG_SERVICE | DEPARTMENT_BITFLAG_ENGINEERING | DEPARTMENT_BITFLAG_SCIENCE
+
 /datum/design/board/shuttle/engine/plasma
 	name = "Плазменный двигатель"
 	desc = "Двигатель, который сжигает плазму, хранящуюся в располагающемся рядом предзажигателе плазменного двигателя."
@@ -1079,6 +1098,42 @@
 	build_path = /obj/item/circuitboard/machine/shuttle/heater
 	build_type = IMPRINTER | MECHFAB
 	construction_time = 40
+	category = list("Спейсподы и шаттлостроение")
+	sub_category = list("шаттлостроение")
+	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING | DEPARTMENTAL_FLAG_SCIENCE
+
+/datum/design/board/shuttle/engine/ion
+	name = "Machine Design (Ion Thruster Board)"
+	desc = "The circuit board for an ion thruster, a weak but electric driven engine."
+	id = "engine_ion"
+	build_path = /obj/item/circuitboard/machine/shuttle/engine/ion
+	category = list("Спейсподы и шаттлостроение")
+	sub_category = list("шаттлостроение")
+	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING | DEPARTMENTAL_FLAG_SCIENCE
+
+/datum/design/board/shuttle/engine/ion/burst
+	name = "Machine Design (Ion Burst Thruster Board)"
+	desc = "The circuit board for an ion burst thruster, a powerful but temporary thrust booster."
+	id = "engine_ion_burst"
+	build_path = /obj/item/circuitboard/machine/shuttle/engine/ion/burst
+	category = list("Спейсподы и шаттлостроение")
+	sub_category = list("шаттлостроение")
+	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING | DEPARTMENTAL_FLAG_SCIENCE
+
+/datum/design/board/shuttle/engine/charger
+	name = "Machine Design (Ion Thruster Capacitor Bank Board)"
+	desc = "The circuit board for an engine capacitor bank."
+	id = "engine_capacitors"
+	build_path = /obj/item/circuitboard/machine/shuttle/capacitor_bank
+	category = list("Спейсподы и шаттлостроение")
+	sub_category = list("шаттлостроение")
+	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING | DEPARTMENTAL_FLAG_SCIENCE
+
+/datum/design/board/plasma_refiner
+	name = "Machine Design (Plasma Refiner Board)"
+	desc = "The circuit board for a plasma refiner."
+	id = "plasma_refiner"
+	build_path = /obj/item/circuitboard/machine/plasma_refiner
 	category = list("Спейсподы и шаттлостроение")
 	sub_category = list("шаттлостроение")
 	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING | DEPARTMENTAL_FLAG_SCIENCE

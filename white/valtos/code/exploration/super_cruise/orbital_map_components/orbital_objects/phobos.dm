@@ -7,6 +7,7 @@
 	static_object = TRUE
 	render_mode = RENDER_MODE_PLANET
 	priority = 20
+	signal_range = 6000
 
 /datum/orbital_object/z_linked/phobos/New()
 	. = ..()

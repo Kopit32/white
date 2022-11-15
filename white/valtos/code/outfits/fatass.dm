@@ -8,7 +8,8 @@
 	glasses = /obj/item/clothing/glasses/thermal/eyepatch
 	ears = /obj/item/radio/headset/headset_cent/commander
 	mask = /obj/item/clothing/mask/cigarette/cigar/havana
-	belt = /obj/item/gun/ballistic/automatic/fallout/railgun
+	belt = /obj/item/vibro_weapon/butcher
+	suit_store = /obj/item/gun/ballistic/automatic/fallout/railgun
 	r_pocket = /obj/item/lighter
 	back = /obj/item/storage/backpack/satchel/leather
 	id = /obj/item/card/id/advanced/centcom
@@ -31,6 +32,6 @@
 	ADD_TRAIT(H, TRAIT_STUNIMMUNE, "fuck_you")
 	H.status_flags |= GODMODE
 
-	AddComponent(/datum/element/phantom, H, 0.5 SECONDS)
+	H.AddElement(/datum/element/phantom, 0.5 SECONDS)
 
 	..()

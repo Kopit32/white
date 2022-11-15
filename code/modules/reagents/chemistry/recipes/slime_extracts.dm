@@ -187,7 +187,7 @@
 	required_other = TRUE
 
 /datum/chemical_reaction/slime/slimefoam/on_reaction(datum/reagents/holder, datum/equilibrium/reaction, created_volume)
-	holder.create_foam(/datum/effect_system/fluid_spread/foam,80, span_danger("[src] spews out foam!"))
+	holder.create_foam(/datum/effect_system/fluid_spread/foam, 80, notification = span_danger("[src] spews out foam!"))
 
 //Dark Blue
 /datum/chemical_reaction/slime/slimefreeze
@@ -209,8 +209,7 @@
 	if(holder?.my_atom)
 		var/turf/open/T = get_turf(holder.my_atom)
 		if(istype(T))
-			var/datum/gas/gastype = GAS_N2
-			T.atmos_spawn_air("[initial(gastype.id)]=50;TEMP=2.7")
+			T.atmos_spawn_air("n2=50;TEMP=2.7")
 
 /datum/chemical_reaction/slime/slimefireproof
 	required_reagents = list(/datum/reagent/water = 1)

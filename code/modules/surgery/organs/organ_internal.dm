@@ -1,6 +1,7 @@
 /obj/item/organ
 	name = "орган"
 	icon = 'icons/obj/surgery.dmi'
+	drop_sound = 'sound/effects/flesh_drop.wav'
 	var/mob/living/carbon/owner = null
 	var/status = ORGAN_ORGANIC
 	w_class = WEIGHT_CLASS_SMALL
@@ -71,9 +72,6 @@
 	/// internal_organs_slot must ALWAYS be ordered in the same way as organ_process_order
 	/// Otherwise life processing breaks down
 	sortTim(owner.internal_organs_slot, /proc/cmp_organ_slot_asc)
-	//вайтокостыль
-	if(!istype(loc, /atom/movable/organ_holder))
-		moveToNullspace()
 	RegisterSignal(owner, COMSIG_PARENT_EXAMINE, .proc/on_owner_examine)
 	for(var/datum/action/action as anything in actions)
 		action.Grant(reciever)

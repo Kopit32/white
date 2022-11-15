@@ -354,7 +354,7 @@
 /obj/machinery/power/apc/syndicate{
 	dir = 1;
 	name = "Syndicate Cargo Pod APC";
-	pixel_y = 23;
+	pixel_y = 25;
 	start_charge = 0
 	},
 /obj/structure/cable,
@@ -475,7 +475,7 @@
 /obj/machinery/power/apc/syndicate{
 	dir = 1;
 	name = "Syndicate Forgotten Ship APC";
-	pixel_y = 23;
+	pixel_y = 25;
 	start_charge = 0
 	},
 /obj/structure/cable,
@@ -696,7 +696,7 @@
 /turf/closed/wall/r_wall/syndicate,
 /area/ruin/space/has_grav/syndicate_forgotten_ship)
 "ca" = (
-/obj/machinery/computer/crew/syndie{
+/obj/machinery/computer/locator{
 	dir = 8
 	},
 /turf/open/floor/mineral/plastitanium/red,

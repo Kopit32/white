@@ -209,8 +209,8 @@
 /datum/techweb_node/mod_basic
 	id = "mod"
 	starting_node = TRUE
-	display_name = "Basic Modular Suits"
-	description = "Specialized back mounted power suits with various different modules."
+	display_name = "Базовые модульные скафандры"
+	description = "Специализированные защитные скафандры с возможность глубокой настройки."
 	design_ids = list(
 		"mod_boots",
 		"mod_chestplate",
@@ -617,17 +617,18 @@
 		"w-recycler" , "emitter",
 		"high_cell",
 		"scanner_gate",
-	"atmosalerts",
+		"atmosalerts",
 		"atmos_control",
 		"recycler",
 		"autolathe",
 		"mesons",
 		"welding_goggles",
+		"tank_compressor",
 		"thermomachine",
 		"rad_collector",
 		"tesla_coil",
 		"grounding_rod",
-	"apc_control",
+		"apc_control",
 		"cell_charger",
 		"power control",
 		"airlock_board",
@@ -637,7 +638,7 @@
 		"cell_charger",
 		"stack_console",
 		"stack_machine",
-	"oxygen_tank",
+		"oxygen_tank",
 		"plasma_tank",
 		"emergency_oxygen",
 		"emergency_oxygen_engi",
@@ -944,6 +945,104 @@
 		"mech_plasma_cutter",
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
+
+/////////////////////////shuttle tech/////////////////////////
+/datum/techweb_node/basic_shuttle_tech
+	id = "basic_shuttle"
+	display_name = "Basic Shuttle Research"
+	description = "Research the technology required to create and use basic shuttles."
+	prereq_ids = list("bluespace_travel", "adv_engi")
+	design_ids = list("shuttle_creator", "orbital_map", "engine_plasma", "engine_ion", "engine_ion_burst", "engine_heater", "engine_capacitors", "shuttle_control", "shuttle_navigation", "wingpack")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
+
+/datum/techweb_node/nullspacebreaching
+	id = "nullspacebreaching"
+	display_name = "Nullspace Breaching"
+	description = "Research into voidspace tunnelling, allowing us to significantly reduce flight times."
+	prereq_ids = list("basic_shuttle", "alientech")
+	design_ids = list("engine_void")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 12500)
+
+/datum/techweb_node/plasma_refiner
+	id = "plasmarefiner"
+	display_name = "Plasma Refining"
+	description = "Development of a machine capable of safely and efficently converting plasma from a solid state to a gaseous state."
+	prereq_ids = list("basic_shuttle")
+	design_ids = list("plasma_refiner")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
+	hidden = TRUE
+
+/datum/techweb_node/shuttle_weapons_basic
+	id = "shuttle_weapons"
+	display_name = "Shuttle Mounted Weaponry"
+	description = "Research into mounting weapons onto the side of moving things."
+	prereq_ids = list("weaponry")
+	design_ids = list("shuttle_laser", "computer_weapons")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 1000)
+
+/datum/techweb_node/shuttle_weapons_lasers
+	id = "shuttle_lasers"
+	display_name = "Shuttle Laser Weaponry"
+	description = "Research into mounting high-powered lasers onto the side of moving things."
+	prereq_ids = list("shuttle_weapons", "emp_adv")
+	design_ids = list("shuttle_laser_burst")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2000)
+
+/datum/techweb_node/shuttle_lasers_better
+	id = "shuttle_lasers_better"
+	display_name = "Advanced Shuttle Laser Weaponry"
+	description = "Research into mounting super-high-powered lasers onto the side of moving things."
+	prereq_ids = list("shuttle_lasers", "emp_super")
+	design_ids = list("shuttle_laser_burst_two")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 5000)
+
+/datum/techweb_node/shuttle_missiles
+	id = "shuttle_missiles"
+	display_name = "Mounted Missile Launchers"
+	description = "Research into mounting missiles onto the side of moving things."
+	prereq_ids = list("shuttle_weapons", "adv_weaponry")
+	design_ids = list("shuttle_missile")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 5000)
+
+/datum/techweb_node/shuttle_tri_missiles
+	id = "shuttle_tri_missiles"
+	display_name = "Mounted Swarm Missile Technology"
+	description = "Research into mounting tri-shot missile launchers onto the side of moving things."
+	prereq_ids = list("shuttle_missiles")
+	design_ids = list("shuttle_tri_missile")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 5000)
+
+/datum/techweb_node/shuttle_specialized_missiles
+	id = "specialized_missiles"
+	display_name = "Specialized Missile Technology"
+	description = "Research into mounting specialized missile launchers onto the side of moving things."
+	prereq_ids = list("shuttle_missiles")
+	design_ids = list("shuttle_breach_missile", "shuttle_fire_missile")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 3000)
+
+/datum/techweb_node/shuttle_ballistics
+	id = "shuttle_ballistics"
+	display_name = "Shuttle Mounted Ballistics"
+	description = "Research into simple, yet effective ballistic weapons for shuttles."
+	prereq_ids = list("shuttle_weapons")
+	design_ids = list("shuttle_point_defense", "shuttle_scatter_shot")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 5000)
+
+/datum/techweb_node/shuttle_better_ballistics
+	id = "shuttle_ballistics_better"
+	display_name = "Upgraded Shuttle Mounted Ballistics"
+	description = "Research into slightly less simple, yet even more effective ballistic weapons for shuttles."
+	prereq_ids = list("shuttle_ballistics", "adv_weaponry")
+	design_ids = list("shuttle_point_defense_upgraded")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 5000)
+
+/datum/techweb_node/shuttle_magnetics
+	id = "shuttle_magnetics"
+	display_name = "Shuttle Mounted Railguns"
+	description = "Combines the power of electromagnetism with the destructive power of iron, creating shuttle-mounted weapons capable of tearing through ships."
+	prereq_ids = list("shuttle_ballistics_better", "emp_super")
+	design_ids = list("shuttle_railgun", "shuttle_railgun_crew")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 10000)
 
 /////////////////////////integrated circuits tech/////////////////////////
 
@@ -1262,33 +1361,16 @@
 		"comptech",
 	)
 	design_ids = list(
-		"hdd_basic",
-		"hdd_advanced",
-		"hdd_super",
-		"hdd_cluster",
-		"ssd_small",
-		"ssd_micro",
-		"netcard_basic",
-		"netcard_advanced",
-		"netcard_wired",
-	"portadrive_basic",
-		"portadrive_advanced",
-		"portadrive_super",
-		"cardslot",
-		"aislot",
-		"miniprinter",
-		"APClink",
-		"bat_control",
-		"bat_normal",
 		"bat_advanced",
-	"bat_super",
+		"bat_control",
 		"bat_micro",
 		"bat_nano",
-		"cpu_normal",
-		"pcpu_normal",
-		"cpu_small",
-		"pcpu_small",
-		"sensorpackage",
+		"bat_normal",
+		"bat_super",
+		"cardslot",
+		"portadrive_advanced",
+		"portadrive_basic",
+		"portadrive_super",
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 1000)  //they are really shitty
 
@@ -1875,8 +1957,8 @@
 
 /datum/techweb_node/mod_advanced
 	id = "mod_advanced"
-	display_name = "Advanced Modular Suits"
-	description = "More advanced modules, to improve modular suits."
+	display_name = "Продвинутые модульные скафандры"
+	description = "Больше продвинутых модулей для совершествования скафандров."
 	prereq_ids = list("robotics")
 	design_ids = list(
 		"mod_visor_diaghud",
@@ -1890,8 +1972,8 @@
 
 /datum/techweb_node/mod_engineering
 	id = "mod_engineering"
-	display_name = "Engineering Modular Suits"
-	description = "Engineering suits, for powered engineers."
+	display_name = "Инженерные модульные скафандры"
+	description = "Инженерные скафандры для снаряжения инженеров."
 	prereq_ids = list("mod_advanced", "engineering")
 	design_ids = list(
 		"mod_plating_engineering",
@@ -1906,8 +1988,8 @@
 
 /datum/techweb_node/mod_advanced_engineering
 	id = "mod_advanced_engineering"
-	display_name = "Advanced Engineering Modular Suits"
-	description = "Advanced Engineering suits, for advanced powered engineers."
+	display_name = "Продвинутые инженерные модульные скафандры"
+	description = "Продвинутые инженерные скафандры для снаряжения продвинутых инженеров."
 	prereq_ids = list("mod_engineering", "adv_engi")
 	design_ids = list(
 		"mod_plating_atmospheric",
@@ -1920,8 +2002,8 @@
 
 /datum/techweb_node/mod_medical
 	id = "mod_medical"
-	display_name = "Medical Modular Suits"
-	description = "Medical suits for quick rescue purposes."
+	display_name = "Медицинские модульные скафандры"
+	description = "Медицинские модульные скафандры для проведения спасательных операциях во враждебной среде."
 	prereq_ids = list("mod_advanced", "biotech")
 	design_ids = list(
 		"mod_plating_medical",
@@ -1936,8 +2018,8 @@
 
 /datum/techweb_node/mod_security
 	id = "mod_security"
-	display_name = "Security Modular Suits"
-	description = "Security suits for space crime handling."
+	display_name = "Модульные скафандры безопасности"
+	description = "Скафандры службы безопасности для поимки преступных мразей вне уюта стационарной атмосферы."
 	prereq_ids = list("mod_advanced", "sec_basic")
 	design_ids = list(
 		"mod_plating_security",
@@ -1953,8 +2035,8 @@
 
 /datum/techweb_node/mod_entertainment
 	id = "mod_entertainment"
-	display_name = "Entertainment Modular Suits"
-	description = "Powered suits for protection against low-humor environments."
+	display_name = "Клоунские модульные скафандры"
+	description = "Усиленные скафандры для защиты против низко-юморного окружения."
 	prereq_ids = list("mod_advanced", "clown")
 	design_ids = list(
 		"mod_plating_cosmohonk",
@@ -1966,8 +2048,8 @@
 
 /datum/techweb_node/mod_anomaly
 	id = "mod_anomaly"
-	display_name = "Anomalock Modular Suits"
-	description = "Modules for modular suits that require anomaly cores to function."
+	display_name = "Применение аномалий в модульных скафандрах"
+	description = "Модули использующие ядра аномалий для функционировании."
 	prereq_ids = list("mod_advanced", "anomaly_research")
 	design_ids = list(
 		"mod_antigrav",
@@ -1977,8 +2059,8 @@
 
 /datum/techweb_node/mod_anomaly_engi
 	id = "mod_anomaly_engi"
-	display_name = "Engineering Anomalock Modular Suits"
-	description = "Advanced modules for modular suits, using anomaly cores to become even better engineers."
+	display_name = "Применение аномалий в инженерных модульных скафандров"
+	description = "Продвинутые модули скафандров, использующие ядра аномалий чтобый стать полезными для инженеров."
 	prereq_ids = list("mod_advanced_engineering", "mod_anomaly")
 	design_ids = list(
 		"mod_kinesis",

@@ -23,7 +23,7 @@
 	var/turf/ceiling_turf = /turf/open/floor/plating
 	var/list/ceiling_baseturfs = list()
 
-/datum/map_template/New(path = null, rename = null, cache = FALSE)
+/datum/map_template/New(path = null, rename = null, cache = FALSE, admin_load = FALSE)
 	if(path)
 		mappath = path
 	if(mappath)
@@ -123,14 +123,14 @@
 	var/x = round((world.maxx - width) * 0.5) + 1
 	var/y = round((world.maxy - height) * 0.5) + 1
 
-	var/datum/space_level/level = SSmapping.add_new_zlevel(name, level_traits, orbital_body_type = orbital_body_type)
+	var/datum/space_level/level = SSmapping.add_new_zlevel(name, level_traits, orbital_body_type = orbital_body_type, contain_turfs = FALSE)
 	SSair.pause_z(level.z_value)
-	var/datum/parsed_map/parsed = load_map(file(mappath), x, y, level.z_value, no_changeturf=(SSatoms.initialized == INITIALIZATION_INSSATOMS), placeOnTop=should_place_on_top)
+	var/datum/parsed_map/parsed = load_map(file(mappath), x, y, level.z_value, no_changeturf=(SSatoms.initialized == INITIALIZATION_INSSATOMS), placeOnTop=should_place_on_top, new_z = TRUE)
 	var/list/bounds = parsed.bounds
 	if(!bounds)
 		return FALSE
 
-	repopulate_sorted_areas()
+	require_area_resort()
 
 	SSair.unpause_z(level.z_value)
 
@@ -142,7 +142,7 @@
 
 	return level
 
-/datum/map_template/proc/load(turf/T, centered = FALSE, init_atmos = TRUE)
+/datum/map_template/proc/load(turf/T, centered = FALSE, init_atmos = TRUE, finalize = TRUE)
 	if(centered)
 		T = locate(T.x - round(width/2) , T.y - round(height/2) , T.z)
 	if(!T)
@@ -175,16 +175,19 @@
 		return
 
 	if(!SSmapping.loading_ruins) //Will be done manually during mapping ss init
-		repopulate_sorted_areas()
+		require_area_resort()
 
 	//initialize things that are normally initialized after map load
-	initTemplateBounds(bounds, init_atmos)
+	//If this is a superfunction call, we don't want to initialize atoms here, let the subfunction handle that
+	if(finalize)
+		//initialize things that are normally initialized after map load
+		initTemplateBounds(bounds, init_atmos)
 
-	if(has_ceiling)
-		var/affected_turfs = get_affected_turfs(T, FALSE)
-		generate_ceiling(affected_turfs)
+		if(has_ceiling)
+			var/affected_turfs = get_affected_turfs(T, FALSE)
+			generate_ceiling(affected_turfs)
 
-	log_game("[name] loaded at [T.x],[T.y],[T.z]")
+		log_game("[name] loaded at [T.x],[T.y],[T.z]")
 	return bounds
 
 /datum/map_template/proc/generate_ceiling(affected_turfs)

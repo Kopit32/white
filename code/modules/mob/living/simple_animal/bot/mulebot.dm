@@ -694,7 +694,7 @@
 
 		if(load) // if loaded, unload at target
 			if(report_delivery)
-				speak("Точка назначения <b>[destination]</b> достигнута. Разгружаю [load].",radio_channel)
+				speak("Точка назначения [destination] достигнута. Разгружаю [load].",radio_channel)
 			unload(loaddir)
 		else
 			// not loaded
@@ -710,7 +710,7 @@
 				if(AM?.Adjacent(src))
 					load(AM)
 					if(report_delivery)
-						speak("Загружаю [load] в <b>[get_area_name(src)]</b>.", radio_channel)
+						speak("Загружаю [load] в [get_area_name(src)].", radio_channel)
 		// whatever happened, check to see if we return home
 
 		if(auto_return && home_destination && destination != home_destination)
@@ -823,7 +823,7 @@
 	else
 		return ..()
 
-/mob/living/simple_animal/bot/mulebot/insertpai(mob/user, obj/item/paicard/card)
+/mob/living/simple_animal/bot/mulebot/insertpai(mob/user, obj/item/pai_card/card)
 	. = ..()
 	if(.)
 		visible_message(span_notice("[src]'s safeties are locked on."))

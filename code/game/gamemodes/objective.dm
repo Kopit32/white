@@ -772,9 +772,11 @@ GLOBAL_LIST_EMPTY(possible_items_special)
 			var/mob/M = owner.current			//Yeah if you get morphed and you eat a quantum tech disk with the RD's latest backup good on you soldier.
 			if(ishuman(M))
 				var/mob/living/carbon/human/H = M
-				if(H && (H.stat != DEAD) && istype(H.wear_suit, /obj/item/clothing/suit/space/space_ninja))
-					var/obj/item/clothing/suit/space/space_ninja/S = H.wear_suit
-					S.stored_research.copy_research_to(checking)
+				var/obj/item/mod/control/mod = H.back
+				if(H && (H.stat != DEAD) && mod)
+					var/obj/item/mod/module/hacker/hacker_module = locate(/obj/item/mod/module/hacker) in mod.modules
+					if(hacker_module)
+						hacker_module.stored_research.copy_research_to(checking)
 			var/list/otherwise = M.get_all_contents()
 			for(var/obj/item/disk/tech_disk/TD in otherwise)
 				TD.stored_research.copy_research_to(checking)
@@ -1075,27 +1077,6 @@ GLOBAL_LIST_EMPTY(possible_items_special)
 	for(var/T in allowed_types)
 		var/datum/objective/X = T
 		GLOB.admin_objective_list[initial(X.name)] = T
-
-/datum/objective/contract
-	var/payout = 0
-	var/payout_bonus = 0
-	var/area/dropoff = null
-
-// Generate a random valid area on the station that the dropoff will happen.
-/datum/objective/contract/proc/generate_dropoff()
-	var/found = FALSE
-	while (!found)
-		var/area/dropoff_area = pick(GLOB.sortedAreas)
-		if(dropoff_area && is_station_level(dropoff_area.z) && !dropoff_area.outdoors)
-			dropoff = dropoff_area
-			found = TRUE
-
-// Check if both the contractor and contract target are at the dropoff point.
-/datum/objective/contract/proc/dropoff_check(mob/user, mob/target)
-	var/area/user_area = get_area(user)
-	var/area/target_area = get_area(target)
-
-	return (istype(user_area, dropoff) && istype(target_area, dropoff))
 
 /datum/objective/ruiner
 	name = "ruiner"

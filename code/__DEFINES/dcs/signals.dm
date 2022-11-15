@@ -6,6 +6,8 @@
 // These are signals which can be listened to by any component on any parent
 // start global signals with "!", this used to be necessary but now it's just a formatting choice
 
+/// called after a successful area creation by a mob: (area/created_area, area/old_area, mob/creator)
+#define COMSIG_AREA_CREATED "!mob_created_area"
 ///from base of datum/controller/subsystem/mapping/proc/add_new_zlevel(): (list/args)
 #define COMSIG_GLOB_NEW_Z "!new_z"
 /// called after a successful var edit somewhere in the world: (list/args)
@@ -258,11 +260,6 @@
 #define COMSIG_ATOM_SET_OPACITY "atom_set_opacity"
 ///from base of atom/hitby(atom/movable/AM, skipcatch, hitpush, blocked, datum/thrownthing/throwingdatum)
 #define COMSIG_ATOM_HITBY "atom_hitby"
-
-//from base of atom/movable/on_enter_storage(): (datum/component/storage/concrete/master_storage)
-#define COMSIG_STORAGE_ENTERED "storage_entered"
-//from base of atom/movable/on_exit_storage(): (datum/component/storage/concrete/master_storage)
-#define COMSIG_STORAGE_EXITED "storage_exited"
 
 ///from base of atom/expose_reagents(): (/list, /datum/reagents, methods, volume_modifier, show_message)
 #define COMSIG_ATOM_EXPOSE_REAGENTS "atom_expose_reagents"
@@ -1100,9 +1097,6 @@
 	///Returned by cleanable components when they are cleaned.
 	#define COMPONENT_CLEANED (1<<0)
 
-///Called from a cleaning tool to start cleaning something.
-#define COMSIG_START_CLEANING "start_cleaning"
-
 //Creamed
 
 ///called when you wash your face at a sink: (num/strength)
@@ -1187,35 +1181,6 @@
 
 ///(customer, container) venue signal sent when a venue sells an item. source is the thing sold, which can be a datum, so we send container for location checks
 #define COMSIG_ITEM_SOLD_TO_CUSTOMER "item_sold_to_customer"
-
-// /datum/component/storage signals
-
-///() - returns bool.
-#define COMSIG_CONTAINS_STORAGE "is_storage"
-///(obj/item/inserting, mob/user, silent, force) - returns bool
-#define COMSIG_TRY_STORAGE_INSERT "storage_try_insert"
-///(mob/show_to, force) - returns bool.
-#define COMSIG_TRY_STORAGE_SHOW "storage_show_to"
-///(mob/hide_from) - returns bool
-#define COMSIG_TRY_STORAGE_HIDE_FROM "storage_hide_from"
-///returns bool
-#define COMSIG_TRY_STORAGE_HIDE_ALL "storage_hide_all"
-///(newstate)
-#define COMSIG_TRY_STORAGE_SET_LOCKSTATE "storage_lock_set_state"
-///() - returns bool. MUST CHECK IF STORAGE IS THERE FIRST!
-#define COMSIG_IS_STORAGE_LOCKED "storage_get_lockstate"
-///(type, atom/destination, amount = INFINITY, check_adjacent, force, mob/user, list/inserted) - returns bool - type can be a list of types.
-#define COMSIG_TRY_STORAGE_TAKE_TYPE "storage_take_type"
-///(type, amount = INFINITY, force = FALSE). Force will ignore max_items, and amount is normally clamped to max_items.
-#define COMSIG_TRY_STORAGE_FILL_TYPE "storage_fill_type"
-///(obj, new_loc, force = FALSE) - returns bool
-#define COMSIG_TRY_STORAGE_TAKE "storage_take_obj"
-///(loc) - returns bool - if loc is null it will dump at parent location.
-#define COMSIG_TRY_STORAGE_QUICK_EMPTY "storage_quick_empty"
-///(list/list_to_inject_results_into, recursively_search_inside_storages = TRUE)
-#define COMSIG_TRY_STORAGE_RETURN_INVENTORY "storage_return_inventory"
-///(obj/item/insertion_candidate, mob/user, silent) - returns bool
-#define COMSIG_TRY_STORAGE_CAN_INSERT "storage_can_equip"
 
 // /datum/component/swabbing signals
 #define COMSIG_SWAB_FOR_SAMPLES "swab_for_samples" ///Called when you try to swab something using the swabable component, includes a mutable list of what has been swabbed so far so it can be modified.
@@ -1566,6 +1531,28 @@
 //from [/datum/move_loop/has_target/jps/recalculate_path] ():
 #define COMSIG_MOVELOOP_JPS_REPATH "moveloop_jps_repath"
 
+// Exploration related signals
+/// Called when a message is sent to an orbital body: (message)
+#define COMSIG_ORBITAL_BODY_MESSAGE "orbital_body_message"
+/// Called on SSorbits when an orbital body is created on an orbital map: (datum/orbital_object/body, datum/orbital_map/map)
+#define COMSIG_ORBITAL_BODY_CREATED "orbital_body_created"
+/// Called on a space level when generation is complete
+#define COMSIG_SPACE_LEVEL_GENERATED "space_level_generated"
+
+// Shuttle Machinery Signals
+/// Called when a shuttle engine updates its status: (is_active)
+#define COMSIG_SHUTTLE_ENGINE_STATUS_CHANGE "shuttle_engine_status"
+/// Called when a shield generator changes its health amount: (old_amount, new_amount)
+#define COMSIG_SHUTTLE_SHIELD_HEALTH_CHANGE "shuttle_shield_health_change"
+/// Called when a shuttle has its NPC controller killed
+#define COMSIG_SHUTTLE_NPC_INCAPACITATED "shuttle_npc_incapacitated"
+/// Called when a collision alert for shuttles is toggled (new_status)
+#define COMSIG_SHUTTLE_TOGGLE_COLLISION_ALERT "shuttle_collision_alert_toggle"
+
+// Orbital Communication Signals
+/// Called when a communication manager receieves a message: (string/sender, string/message, bool/emergency)
+#define COMSIG_COMMUNICATION_RECEIEVED "communication_recieved"
+
 // Yes, they do support this
 
 // from /client/proc/change_view() : (new_size)
@@ -1649,3 +1636,20 @@
 //Lua hooks or whatnot
 ///Just ctrl+shift+f this shit, i'm not your mum.
 #define COMSIG_SIGNALLER_PULSED "signaller_pulsed"
+
+///From /obj/effect/rune/convert/do_sacrifice() : (list/invokers)
+#define COMSIG_LIVING_CULT_SACRIFICED "living_cult_sacrificed"
+	/// Return to stop the sac from occurring
+	#define STOP_SACRIFICE (1<<0)
+	/// Don't send a message for sacrificing this thing, we have our own
+	#define SILENCE_SACRIFICE_MESSAGE (1<<1)
+
+// Modular computer's file signals. Tells the program datum something is going on.
+/// From /obj/item/modular_computer/proc/store_file: ()
+#define COMSIG_MODULAR_COMPUTER_FILE_ADDING "comsig_modular_computer_file_adding"
+/// From /obj/item/modular_computer/proc/store_file: ()
+#define COMSIG_MODULAR_COMPUTER_FILE_ADDED "comsig_modular_computer_file_adding"
+/// From /obj/item/modular_computer/proc/remove_file: ()
+#define COMSIG_MODULAR_COMPUTER_FILE_DELETING "comsig_modular_computer_file_deleting"
+/// From /obj/item/modular_computer/proc/store_file: ()
+#define COMSIG_MODULAR_COMPUTER_FILE_DELETED "comsig_modular_computer_file_adding"

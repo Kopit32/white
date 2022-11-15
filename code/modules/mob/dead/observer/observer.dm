@@ -561,8 +561,7 @@ GLOBAL_LIST_INIT(ghost_orbits, list(GHOST_ORBIT_CIRCLE,GHOST_ORBIT_TRIANGLE,GHOS
 		to_chat(usr, span_warning("Not when you're not dead!"))
 		return
 	var/list/filtered = list()
-	for(var/V in GLOB.sortedAreas)
-		var/area/A = V
+	for(var/area/A as anything in get_sorted_areas())
 		if(!(A.area_flags & HIDDEN_AREA))
 			filtered += A
 	var/area/thearea  = tgui_input_list(usr, "Куда прыгаем?", "БУ!", filtered)
@@ -961,6 +960,9 @@ GLOBAL_LIST_INIT(ghost_orbits, list(GHOST_ORBIT_CIRCLE,GHOST_ORBIT_TRIANGLE,GHOS
 /mob/dead/observer/is_literate()
 	return TRUE
 
+/mob/dead/observer/can_read(atom/viewed_atom, reading_check_flags, silent)
+	return TRUE // we want to bypass all the checks
+
 /mob/dead/observer/vv_edit_var(var_name, var_value)
 	. = ..()
 	switch(var_name)
@@ -1041,7 +1043,7 @@ GLOBAL_LIST_INIT(ghost_orbits, list(GHOST_ORBIT_CIRCLE,GHOST_ORBIT_TRIANGLE,GHOS
 
 /mob/dead/observer/proc/register_pai()
 	if(isobserver(src))
-		SSpai.recruitWindow(src)
+		SSpai.recruit_window(src)
 	else
 		to_chat(usr, span_warning("Can't become a pAI candidate while not dead!"))
 

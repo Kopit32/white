@@ -298,7 +298,6 @@
 	height = 11
 	dir = EAST
 	port_direction = WEST
-	var/sound_played = 0 //If the launch sound has been sent to all players on the shuttle itself
 	var/hijack_status = NOT_BEGUN
 
 /obj/docking_port/mobile/emergency/canDock(obj/docking_port/stationary/S)
@@ -486,7 +485,7 @@
 			if(time_left <= 50 && !sound_played) //4 seconds left:REV UP THOSE ENGINES BOYS. - should sync up with the launch
 				sound_played = 1 //Only rev them up once.
 				var/list/areas = list()
-				for(var/area/shuttle/escape/E in GLOB.sortedAreas)
+				for(var/area/shuttle/escape/E in GLOB.areas)
 					areas += E
 				hyperspace_sound(HYPERSPACE_WARMUP, areas)
 
@@ -498,7 +497,7 @@
 
 				//now move the actual emergency shuttle to its transit dock
 				var/list/areas = list()
-				for(var/area/shuttle/escape/E in GLOB.sortedAreas)
+				for(var/area/shuttle/escape/E in GLOB.areas)
 					areas += E
 				hyperspace_sound(HYPERSPACE_LAUNCH, areas)
 				enterTransit()
@@ -517,7 +516,7 @@
 		if(SHUTTLE_ESCAPE)
 			if(sound_played && time_left <= HYPERSPACE_END_TIME)
 				var/list/areas = list()
-				for(var/area/shuttle/escape/E in GLOB.sortedAreas)
+				for(var/area/shuttle/escape/E in GLOB.areas)
 					areas += E
 				hyperspace_sound(HYPERSPACE_END, areas)
 			if(time_left <= PARALLAX_LOOP_TIME)
@@ -575,7 +574,7 @@
 
 /obj/docking_port/mobile/pod/request(obj/docking_port/stationary/S)
 	var/obj/machinery/computer/shuttle_flight/C = getControlConsole()
-	if(!istype(C, /obj/machinery/computer/shuttle_flight/pod))
+	if(!istype(C, /obj/machinery/computer/shuttle_flight/pod) || !istype(S, /obj/docking_port/stationary/transit))
 		return ..()
 	if(SSsecurity_level.current_level >= SEC_LEVEL_RED || (C && (C.obj_flags & EMAGGED)))
 		if(launch_status == UNLAUNCHED)
@@ -612,9 +611,16 @@
 	to_chat(user, span_warning("Сжигаю систему проверки уровня тревоги и активирую радар."))
 
 /obj/machinery/computer/shuttle_flight/pod/connect_to_shuttle(obj/docking_port/mobile/port, obj/docking_port/stationary/dock, idnum, override=FALSE)
-	if(port)
-		shuttleId = port.id
-		shuttlePortId = "[shuttleId]_custom"
+	. = ..()
+	if(recall_docking_port_id == initial(recall_docking_port_id) || override)
+		recall_docking_port_id = "pod_lavaland[idnum]"
+		valid_docks = list("pod_lavaland[idnum]")
+
+/obj/machinery/computer/shuttle_flight/pod/launch_shuttle()
+	var/datum/orbital_object/shuttle/launched_shuttle = ..()
+	if(launched_shuttle && (obj_flags & EMAGGED))
+		launched_shuttle.force_crash = TRUE
+	return launched_shuttle
 
 /obj/docking_port/stationary/random
 	name = "эвакуационный челнок"
@@ -712,7 +718,7 @@ GLOBAL_LIST_EMPTY(emergency_storages)
 
 /obj/item/storage/pod/attack_hand(mob/user)
 	if (can_interact(user))
-		SEND_SIGNAL(src, COMSIG_TRY_STORAGE_SHOW, user)
+		atom_storage?.show_contents(user)
 		return TRUE
 	return FALSE
 

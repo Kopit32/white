@@ -12,6 +12,7 @@
 	armor = list(MELEE = 50, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 0, FIRE = 50, ACID = 30)
 	max_integrity = 200
 	integrity_failure = 0.25
+	interaction_flags_machine = INTERACT_MACHINE_ALLOW_SILICON|INTERACT_MACHINE_SET_MACHINE|INTERACT_MACHINE_REQUIRES_LITERACY
 	///Reference to the currently logged in user.
 	var/datum/bank_account/current_user
 	///How much paper is contained within the newscaster?
@@ -50,6 +51,9 @@
 	var/bounty_value = 1
 	///Text of the currently written bounty
 	var/bounty_text = ""
+
+/obj/machinery/newscaster/pai/ui_state(mob/user)
+	return GLOB.reverse_contained_state
 
 MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/newscaster, 30)
 
@@ -636,7 +640,7 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/newscaster, 30)
 	var/datum/feed_comment/new_feed_comment = new/datum/feed_comment
 	new_feed_comment.author = current_user.account_holder
 	new_feed_comment.body = comment_text
-	new_feed_comment.time_stamp = SSday_night.get_twentyfourhour_timestamp()
+	new_feed_comment.time_stamp = station_time_timestamp()
 	current_message.comments += new_feed_comment
 	usr.log_message("(as [current_user.account_holder]) commented on message [current_message.return_body(-1)] -- [current_message.body]", LOG_COMMENT)
 	creating_comment = FALSE

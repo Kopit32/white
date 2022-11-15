@@ -7,8 +7,6 @@
 	icon_state = "storage"
 	complexity = 3
 	incompatible_modules = list(/obj/item/mod/module/storage, /obj/item/mod/module/plate_compression)
-	/// The storage component of the module.
-	var/datum/component/storage/concrete/storage
 	/// Max weight class of items in the storage.
 	var/max_w_class = WEIGHT_CLASS_NORMAL
 	/// Max combined weight of all items in the storage.
@@ -18,35 +16,30 @@
 
 /obj/item/mod/module/storage/Initialize(mapload)
 	. = ..()
-	storage = AddComponent(/datum/component/storage/concrete)
-	storage.max_w_class = max_w_class
-	storage.max_combined_w_class = max_combined_w_class
-	storage.max_items = max_items
-	storage.allow_big_nesting = TRUE
-	SEND_SIGNAL(src, COMSIG_TRY_STORAGE_SET_LOCKSTATE, TRUE)
+	create_storage(max_specific_storage = max_w_class, max_total_storage = max_combined_w_class, max_slots = max_items)
+	atom_storage.allow_big_nesting = TRUE
+	atom_storage.locked = TRUE
 
 /obj/item/mod/module/storage/on_install()
-	var/datum/component/storage/modstorage = mod.AddComponent(/datum/component/storage, storage)
-	modstorage.max_w_class = max_w_class
-	modstorage.max_combined_w_class = max_combined_w_class
-	modstorage.max_items = max_items
-	SEND_SIGNAL(src, COMSIG_TRY_STORAGE_SET_LOCKSTATE, FALSE)
+	var/datum/storage/modstorage = mod.create_storage(max_specific_storage = max_w_class, max_total_storage = max_combined_w_class, max_slots = max_items)
+	modstorage.set_real_location(src)
+	atom_storage.locked = FALSE
 	RegisterSignal(mod.chestplate, COMSIG_ITEM_PRE_UNEQUIP, .proc/on_chestplate_unequip)
 
 /obj/item/mod/module/storage/on_uninstall(deleting = FALSE)
-	var/datum/component/storage/modstorage = mod.GetComponent(/datum/component/storage)
-	storage.slaves -= modstorage
+	var/datum/storage/modstorage = mod.atom_storage
+	atom_storage.locked = TRUE
 	qdel(modstorage)
-	UnregisterSignal(mod.chestplate, COMSIG_ITEM_PRE_UNEQUIP)
 	if(!deleting)
-		SEND_SIGNAL(src, COMSIG_TRY_STORAGE_QUICK_EMPTY, drop_location())
-	SEND_SIGNAL(src, COMSIG_TRY_STORAGE_SET_LOCKSTATE, TRUE)
+		atom_storage.remove_all(get_turf(src))
+	UnregisterSignal(mod.chestplate, COMSIG_ITEM_PRE_UNEQUIP)
 
 /obj/item/mod/module/storage/proc/on_chestplate_unequip(obj/item/source, force, atom/newloc, no_move, invdrop, silent)
 	if(QDELETED(source) || !mod.wearer || newloc == mod.wearer || !mod.wearer.s_store)
 		return
 	to_chat(mod.wearer, span_notice("[src] пытается положить [mod.wearer.s_store] внутрь себя."))
-	SEND_SIGNAL(src, COMSIG_TRY_STORAGE_INSERT, mod.wearer.s_store, mod.wearer, TRUE)
+	if(atom_storage?.attempt_insert(mod.wearer.s_store, mod.wearer, override = TRUE))
+		mod.wearer.temporarilyRemoveItemFromInventory(mod.wearer.s_store)
 
 /obj/item/mod/module/storage/large_capacity
 	name = "продвинутый модуль хранилища"
@@ -449,7 +442,7 @@
 
 ///Plasma Stabilizer - Prevents plasmamen from igniting in the suit
 /obj/item/mod/module/plasma_stabilizer
-	name = "MOD модуль стабилизации плазмы"
+	name = "модуль стабилизации плазмы"
 	desc = "Система атмоформации, преобразующая внутреннюю среду внутри костюма из кислорода в плазму,\
 		предотвращающая возгорание носителя. \
 		Плазмастекло предотвращает ионизацию плазмы "
@@ -569,7 +562,7 @@
 
 ///Sign Language Translator - allows people to sign over comms using the modsuit's gloves.
 /obj/item/mod/module/signlang_radio
-	name = "MOD модуль перевода языка жестов"
+	name = "модуль перевода языка жестов"
 	desc = "Модуль добавляет датчики движения в перчатки скафандра, \
 		которые работают с низко-волновыми суб-световыми передатчиками, \
 		конвертируя жесты в голос по аудисвязи."

@@ -23,7 +23,7 @@
 /area/shuttle/yohei)
 "bK" = (
 /obj/structure/table/abductor,
-/obj/item/modular_computer/tablet/preset/cheap{
+/obj/item/modular_computer/tablet{
 	pixel_y = 19
 	},
 /obj/item/integrated_circuit_printer/upgraded{
@@ -63,10 +63,6 @@
 /obj/item/storage/photo_album/syndicate,
 /obj/structure/table/abductor,
 /turf/open/floor/plasteel/tg/smooth_large,
-/area/shuttle/yohei)
-"em" = (
-/obj/machinery/telecomms/relay/preset/yohei,
-/turf/open/floor/plasteel/tg/dark/smooth_large,
 /area/shuttle/yohei)
 "eA" = (
 /obj/effect/turf_decal/siding/wideplating/dark{
@@ -113,6 +109,7 @@
 /obj/structure/railing,
 /obj/structure/fans/tiny/invisible,
 /obj/docking_port/mobile/yohei{
+	faction_type = /datum/faction/independant;
 	dwidth = 4;
 	height = 5;
 	width = 9
@@ -204,8 +201,8 @@
 	},
 /area/shuttle/yohei)
 "om" = (
-/obj/structure/shuttle/engine/large,
 /obj/effect/turf_decal/stripes/full,
+/obj/machinery/shuttle/engine/advanced/large,
 /turf/open/floor/engine,
 /area/shuttle/yohei)
 "on" = (
@@ -877,7 +874,7 @@ sg
 Fb
 zL
 Fb
-em
+Fb
 Fb
 sg
 Bq

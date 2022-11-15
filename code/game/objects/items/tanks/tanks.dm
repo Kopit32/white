@@ -22,7 +22,6 @@
 	var/volume = 70
 	/// Icon state when in a tank holder. Null makes it incompatible with tank holder.
 	var/tank_holder_icon_state = "holder_generic"
-	var/pocket_storage_component_path //кармашек
 
 /obj/item/tank/ui_action_click(mob/user)
 	toggle_internals(user)
@@ -35,7 +34,6 @@
 	if(H.internal == src)
 		to_chat(H, span_notice("You close [src] valve."))
 		H.internal = null
-		H.update_internals_hud_icon(0)
 	else
 		if(!H.getorganslot(ORGAN_SLOT_BREATHING_TUBE))
 			if(!H.wear_mask)
@@ -53,7 +51,6 @@
 		else
 			to_chat(H, span_notice("You open [src] valve."))
 		H.internal = src
-		H.update_internals_hud_icon(1)
 	H.update_action_buttons_icon()
 
 

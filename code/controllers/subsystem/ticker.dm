@@ -27,7 +27,6 @@ SUBSYSTEM_DEF(ticker)
 
 	var/delay_end = FALSE						//if set true, the round will not restart on it's own
 	var/admin_delay_notice = ""				//a message to display to anyone who tries to restart the world after a delay
-	var/ready_for_reboot = FALSE			//all roundend preparation done with, all that's left is reboot
 
 	///If not set to ANON_DISABLED then people spawn with a themed anon name (see anonymousnames.dm)
 	var/anonymousnames = ANON_DISABLED
@@ -325,6 +324,9 @@ SUBSYSTEM_DEF(ticker)
 	SSdbcore.SetRoundStart()
 
 	to_chat(world, span_notice("Приветствуем вас на <B>[station_name()]</B>, приятного пребывания!"))
+
+	// two separate sounds
+	SEND_SOUND(world, sound('sound/ai/sheptun.ogg'))
 	SEND_SOUND(world, sound(SSstation.announcer.get_rand_welcome_sound()))
 
 	current_state = GAME_STATE_PLAYING

@@ -152,6 +152,12 @@
 	if(!loc.AllowClick())
 		return
 
+	// In a storage item with a disassociated storage parent
+	var/obj/item/item_atom = A
+	if(istype(item_atom))
+		if((item_atom.item_flags & IN_STORAGE) && (item_atom.loc.flags_1 & HAS_DISASSOCIATED_STORAGE_1))
+			UnarmedAttack(item_atom, TRUE, modifiers)
+
 	//Standard reach turf to turf or reaching inside storage
 	if(CanReach(A,W))
 		if(W)
@@ -205,6 +211,7 @@
 
 	var/list/closed = list()
 	var/list/checking = list(ultimate_target)
+
 	while (checking.len && depth > 0)
 		var/list/next = list()
 		--depth
@@ -212,16 +219,17 @@
 		for(var/atom/target in checking)  // will filter out nulls
 			if(closed[target] || isarea(target))  // avoid infinity situations
 				continue
-			closed[target] = TRUE
-			if(isturf(target) || isturf(target.loc) || (target in direct_access) || (ismovable(target) && target.flags_1 & IS_ONTOP_1)) //Directly accessible atoms
+
+			if(isturf(target) || isturf(target.loc) || (target in direct_access) || (ismovable(target) && target.flags_1 & IS_ONTOP_1) || target.loc?.atom_storage) //Directly accessible atoms
 				if(Adjacent(target) || (tool && CheckToolReach(src, target, tool.reach))) //Adjacent or reaching attacks
 					return TRUE
+
+			closed[target] = TRUE
 
 			if (!target.loc)
 				continue
 
-			//Storage and things with reachable internal atoms need add to next here. Or return COMPONENT_ALLOW_REACH.
-			if(SEND_SIGNAL(target.loc, COMSIG_ATOM_CANREACH, next) & COMPONENT_ALLOW_REACH)
+			if(target.loc.atom_storage)
 				next += target.loc
 
 		checking = next
@@ -235,6 +243,9 @@
 
 /mob/living/DirectAccess(atom/target)
 	return ..() + get_all_contents()
+
+/mob/living/carbon/DirectAccess(atom/target)
+	return ..() + internal_organs
 
 /atom/proc/AllowClick()
 	return FALSE

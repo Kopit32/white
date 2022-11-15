@@ -9,24 +9,24 @@
 
 	C.parallax_layers_cached = list()
 
-	if(HAS_TRAIT(viewmob, TRAIT_HACKER))
+	if(HAS_TRAIT(viewmob, TRAIT_HACKER) || GLOB.forced_parallax_type == 100)
 		C.parallax_layers_cached += new /atom/movable/screen/parallax_layer/cyberspess(null, screenmob)
 		C.parallax_layers_cached += new /atom/movable/screen/parallax_layer/mazespace(null, screenmob)
-	else if(HAS_TRAIT(viewmob, TRAIT_DREAMER))
+	else if(HAS_TRAIT(viewmob, TRAIT_DREAMER) || GLOB.forced_parallax_type == 101)
 		C.parallax_layers_cached += new /atom/movable/screen/parallax_layer/shizospace(null, screenmob)
-	else if(GLOB.station_orbit_parallax_type == 3)
+	else if(GLOB.forced_parallax_type == 3)
 		C.parallax_layers_cached += new /atom/movable/screen/parallax_layer/ice_surface(null, screenmob)
 		C.parallax_layers_cached += new /atom/movable/screen/parallax_layer/clouds(null, screenmob)
-	else if(GLOB.station_orbit_parallax_type == 4)
+	else if(GLOB.forced_parallax_type == 4)
 		C.parallax_layers_cached += new /atom/movable/screen/parallax_layer/fucking(null, screenmob)
-	else if(GLOB.station_orbit_parallax_type == 5)
+	else if(GLOB.forced_parallax_type == 5)
 		C.parallax_layers_cached += new /atom/movable/screen/parallax_layer/ice_surface(null, screenmob)
 	else
 		C.parallax_layers_cached += new SSparallax.random_space(null, screenmob)
 		C.parallax_layers_cached += new /atom/movable/screen/parallax_layer/layer_2(null, screenmob)
 		C.parallax_layers_cached += new /atom/movable/screen/parallax_layer/planet(null, screenmob)
 		if(SSparallax.random_layer)
-			C.parallax_layers_cached += new SSparallax.random_layer
+			C.parallax_layers_cached += new SSparallax.random_layer(null, screenmob)
 		C.parallax_layers_cached += new /atom/movable/screen/parallax_layer/layer_3(null, screenmob)
 
 	C.parallax_layers = C.parallax_layers_cached.Copy()
@@ -74,11 +74,7 @@
 	if(!C)
 		return FALSE
 	// Default to HIGH
-	var/parallax_selection = PARALLAX_HIGH
-	if(C?.prefs)
-		parallax_selection = C.prefs.parallax
-		if (!parallax_selection)
-			parallax_selection = PARALLAX_HIGH
+	var/parallax_selection = C?.prefs.parallax || PARALLAX_HIGH
 
 	switch(parallax_selection)
 		if (PARALLAX_INSANE)
@@ -144,6 +140,8 @@
 	if(!skip_windups)
 		for(var/thing in C.parallax_layers)
 			var/atom/movable/screen/parallax_layer/L = thing
+			if(!L)
+				continue
 
 			var/T = PARALLAX_LOOP_TIME / L.speed
 			if (isnull(shortesttimer))
@@ -374,13 +372,14 @@ GLOBAL_VAR_INIT(asteroids_randomed_number, rand(1, 5))
 /atom/movable/screen/parallax_layer/random/asteroids
 	icon_state = "asteroids_1"
 	blend_mode = BLEND_ADD
+	layer = 4
 
 /atom/movable/screen/parallax_layer/random/asteroids/Initialize(mapload, mob/owner)
 	icon_state = "asteroids_[GLOB.asteroids_randomed_number]"
 	. = ..()
 
 /atom/movable/screen/parallax_layer/planet
-	icon_state = "planet_lavaland"
+	icon_state = "planet_ozon"
 	blend_mode = BLEND_OVERLAY
 	absolute = TRUE //Status of seperation
 	speed = 2.5
@@ -439,7 +438,6 @@ GLOBAL_VAR_INIT(asteroids_randomed_number, rand(1, 5))
 
 /atom/movable/screen/parallax_layer/cyberspess
 	icon_state = "cyberspess"
-	color = "#ff3333"
 	speed = 4
 	layer = 1
 
@@ -450,7 +448,6 @@ GLOBAL_VAR_INIT(asteroids_randomed_number, rand(1, 5))
 
 /atom/movable/screen/parallax_layer/mazespace
 	icon_state = "mazespace"
-	color = "#ff3333"
+	blend_mode = 4
 	speed = 16
-	alpha = 75
 	layer = 2

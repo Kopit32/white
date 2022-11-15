@@ -18,7 +18,9 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 	"Slimecore" = 'icons/hud/screen_slimecore.dmi',
 	"Operative" = 'icons/hud/screen_operative.dmi',
 	"Clockwork" = 'icons/hud/screen_clockwork.dmi',
-	"Glass" = 'icons/hud/screen_glass.dmi'
+	"Glass" = 'icons/hud/screen_glass.dmi',
+	"Trasen-Knox" = 'icons/hud/screen_trasenknox.dmi',
+	"Syndiekats" = 'icons/hud/screen_syndiekats.dmi'
 ))
 
 /proc/ui_style2icon(ui_style)
@@ -85,11 +87,6 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 	var/atom/movable/screen/movable/action_button/hide_toggle/hide_actions_toggle
 	var/action_buttons_hidden = FALSE
 
-	var/atom/movable/screen/button_palette/toggle_palette
-	var/atom/movable/screen/palette_scroll/down/palette_down
-	var/atom/movable/screen/palette_scroll/up/palette_up
-
-	var/datum/action_group/palette/palette_actions
 	var/datum/action_group/listed/listed_actions
 	var/list/floating_actions
 
@@ -98,7 +95,6 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 	var/atom/movable/screen/healths
 	var/atom/movable/screen/stamina
 	var/atom/movable/screen/healthdoll
-	var/atom/movable/screen/internals
 	var/atom/movable/screen/tooltip/tooltip
 	var/atom/movable/screen/timelimit/timelimit
 	var/atom/movable/screen/wanted/wanted_lvl
@@ -114,13 +110,6 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 	if (!ui_style)
 		// will fall back to the default if any of these are null
 		ui_style = ui_style2icon(owner?.client?.prefs?.UI_style)
-
-	toggle_palette = new()
-	toggle_palette.set_hud(src)
-	palette_down = new()
-	palette_down.set_hud(src)
-	palette_up = new()
-	palette_up.set_hud(src)
 
 	hand_slots = list()
 
@@ -205,10 +194,6 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 	if(mymob.hud_used == src)
 		mymob.hud_used = null
 
-	QDEL_NULL(toggle_palette)
-	QDEL_NULL(palette_down)
-	QDEL_NULL(palette_up)
-	QDEL_NULL(palette_actions)
 	QDEL_NULL(listed_actions)
 	QDEL_LIST(floating_actions)
 	QDEL_NULL(module_store_icon)
@@ -230,7 +215,6 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 	stamina = null
 	healthdoll = null
 	wanted_lvl = null
-	internals = null
 	spacesuit = null
 	lingchemdisplay = null
 	lingstingdisplay = null
@@ -320,8 +304,8 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 				screenmob.client.screen += hotkeybuttons
 			if(infodisplay.len)
 				screenmob.client.screen += infodisplay
-
-			screenmob.client.screen += toggle_palette
+			if(screenoverlays.len)
+				screenmob.client.screen += screenoverlays
 
 			if(action_intent)
 				action_intent.screen_loc = initial(action_intent.screen_loc) //Restore intent selection to the original position
@@ -336,6 +320,8 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 				screenmob.client.screen -= hotkeybuttons
 			if(infodisplay.len)
 				screenmob.client.screen += infodisplay
+			if(screenoverlays.len)
+				screenmob.client.screen += screenoverlays
 
 			//These ones are a part of 'static_inventory', 'toggleable_inventory' or 'hotkeybuttons' but we want them to stay
 			for(var/h in hand_slots)
@@ -356,6 +342,8 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 				screenmob.client.screen -= hotkeybuttons
 			if(infodisplay.len)
 				screenmob.client.screen -= infodisplay
+			if(screenoverlays.len) // no way
+				screenmob.client.screen += screenoverlays
 
 	hud_version = display_hud_version
 	persistent_inventory_update(screenmob)
@@ -475,8 +463,6 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 			return
 		if(SCRN_OBJ_IN_LIST)
 			listed_actions.insert_action(button)
-		if(SCRN_OBJ_IN_PALETTE)
-			palette_actions.insert_action(button)
 		if(SCRN_OBJ_INSERT_FIRST)
 			listed_actions.insert_action(button, index = 1)
 			position = SCRN_OBJ_IN_LIST
@@ -493,8 +479,6 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 	switch(relative_to.location)
 		if(SCRN_OBJ_IN_LIST)
 			listed_actions.insert_action(button, listed_actions.index_of(relative_to))
-		if(SCRN_OBJ_IN_PALETTE)
-			palette_actions.insert_action(button, palette_actions.index_of(relative_to))
 		if(SCRN_OBJ_FLOATING) // If we don't have it as a define, this is a screen_loc, and we should be floating
 			floating_actions += button
 			var/client/our_client = mymob.client
@@ -514,44 +498,23 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 			floating_actions -= button
 		if(SCRN_OBJ_IN_LIST)
 			listed_actions.remove_action(button)
-		if(SCRN_OBJ_IN_PALETTE)
-			palette_actions.remove_action(button)
 	button.screen_loc = null
 
 /// Generates visual landings for all groups that the button is not a memeber of
 /datum/hud/proc/generate_landings(atom/movable/screen/movable/action_button/button)
 	listed_actions.generate_landing()
-	palette_actions.generate_landing()
 
 /// Clears all currently visible landings
 /datum/hud/proc/hide_landings()
 	listed_actions.clear_landing()
-	palette_actions.clear_landing()
 
 // Updates any existing "owned" visuals, ensures they continue to be visible
 /datum/hud/proc/update_our_owner()
-	toggle_palette.refresh_owner()
-	palette_down.refresh_owner()
-	palette_up.refresh_owner()
 	listed_actions.update_landing()
-	palette_actions.update_landing()
-
-/// Ensures all of our buttons are properly within the bounds of our client's view, moves them if they're not
-/datum/hud/proc/view_audit_buttons()
-	var/our_view = mymob?.client?.view
-	if(!our_view)
-		return
-	listed_actions.check_against_view()
-	palette_actions.check_against_view()
-	for(var/atom/movable/screen/movable/action_button/floating_button as anything in floating_actions)
-		var/list/current_offsets = screen_loc_to_offset(floating_button.screen_loc)
-		// We set the view arg here, so the output will be properly hemm'd in by our new view
-		floating_button.screen_loc = offset_to_screen_loc(current_offsets[1], current_offsets[2], view = our_view)
 
 /// Generates and fills new action groups with our mob's current actions
 /datum/hud/proc/build_action_groups()
 	listed_actions = new(src)
-	palette_actions = new(src)
 	floating_actions = list()
 	for(var/datum/action/action as anything in mymob.actions)
 		var/atom/movable/screen/movable/action_button/button = action.viewers[src]
@@ -565,10 +528,6 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 	var/datum/hud/owner
 	/// The actions we're managing
 	var/list/atom/movable/screen/movable/action_button/actions
-	/// The initial vertical offset of our action buttons
-	var/north_offset = 0
-	/// The pixel vertical offset of our action buttons
-	var/pixel_north_offset = 0
 	/// Max amount of buttons we can have per row
 	/// Indexes at 1
 	var/column_max = 0
@@ -630,52 +589,16 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 /// Accepts a number represeting our position in the group, indexes at 0 to make the math nicer
 /datum/action_group/proc/ButtonNumberToScreenCoords(number, landing = FALSE)
 	var/row = round(number / column_max)
-	row -= row_offset // If you're less then 0, you don't get to render, this lets us "scroll" rows ya feel?
+	row -= row_offset
+
 	if(row < 0)
 		return null
 
-	// Could use >= here, but I think it's worth noting that the two start at different places, since row is based on number here
 	if(row > max_rows - 1)
-		if(!landing) // If you're not a landing, go away please. thx
-			return null
-		// We always want to render landings, even if their action button can't be displayed.
-		// So we set a row equal to the max amount of rows + 1. Willing to overrun that max slightly to properly display the landing spot
-		row = max_rows // Remembering that max_rows indexes at 1, and row indexes at 0
-
-		// We're going to need to set our column to match the first item in the last row, so let's set number properly now
+		row = max_rows
 		number = row * column_max
 
-	var/visual_row = row + north_offset
-	var/coord_row = visual_row ? "-[visual_row]" : "+0"
-
-	var/visual_column = number % column_max
-	var/coord_col = "+[visual_column]"
-	var/coord_col_offset = 4 + 2 * (visual_column + 1)
-	return "WEST[coord_col]:[coord_col_offset],NORTH[coord_row]:-[pixel_north_offset]"
-
-/datum/action_group/proc/check_against_view()
-	var/owner_view = owner?.mymob?.client?.view
-	if(!owner_view)
-		return
-	// Unlikey as it is, we may have been changed. Want to start from our target position and fail down
-	column_max = initial(column_max)
-	// Convert our viewer's view var into a workable offset
-	var/list/view_size = view_to_pixels(owner_view)
-
-	// We're primarially concerned about width here, if someone makes us 1x2000 I wish them a swift and watery death
-	var/furthest_screen_loc = ButtonNumberToScreenCoords(column_max - 1)
-	var/list/offsets = screen_loc_to_offset(furthest_screen_loc, owner_view)
-	if(offsets[1] > world.icon_size && offsets[1] < view_size[1] && offsets[2] > world.icon_size && offsets[2] < view_size[2]) // We're all good
-		return
-
-	for(column_max in column_max - 1 to 1 step -1) // Yes I could do this by unwrapping ButtonNumberToScreenCoords, but I don't feel like it
-		var/tested_screen_loc = ButtonNumberToScreenCoords(column_max)
-		offsets = screen_loc_to_offset(tested_screen_loc, owner_view)
-		// We've found a valid max length, pack it in
-		if(offsets[1] > world.icon_size && offsets[1] < view_size[1] && offsets[2] > world.icon_size && offsets[2] < view_size[2])
-			break
-	// Use our newly resized column max
-	refresh_actions()
+	return "WEST+[(number - column_max * row)]:4,NORTH-[row]:-4"
 
 /// Returns the amount of objects we're storing at the moment
 /datum/action_group/proc/size()
@@ -708,65 +631,7 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 	row_offset += amount
 	refresh_actions()
 
-/datum/action_group/palette
-	north_offset = 2
-	column_max = 3
-	max_rows = 3
-	location = SCRN_OBJ_IN_PALETTE
-
-/datum/action_group/palette/insert_action(atom/movable/screen/action, index)
-	. = ..()
-	var/atom/movable/screen/button_palette/palette = owner.toggle_palette
-	palette.play_item_added()
-
-/datum/action_group/palette/remove_action(atom/movable/screen/action)
-	. = ..()
-	var/atom/movable/screen/button_palette/palette = owner.toggle_palette
-	palette.play_item_removed()
-	if(!length(actions))
-		palette.set_expanded(FALSE)
-
-/datum/action_group/palette/refresh_actions()
-	var/atom/movable/screen/button_palette/palette = owner.toggle_palette
-	var/atom/movable/screen/palette_scroll/scroll_down = owner.palette_down
-	var/atom/movable/screen/palette_scroll/scroll_up = owner.palette_up
-
-	var/actions_above = round((owner.listed_actions.size() - 1) / owner.listed_actions.column_max)
-	north_offset = initial(north_offset) + actions_above
-
-	palette.screen_loc = ui_action_palette_offset(actions_above)
-	var/action_count = length(owner?.mymob?.actions)
-	var/our_row_count = round((length(actions) - 1) / column_max)
-	if(!action_count)
-		palette.screen_loc = null
-
-	if(palette.expanded && action_count && our_row_count >= max_rows)
-		scroll_down.screen_loc = ui_palette_scroll_offset(actions_above)
-		scroll_up.screen_loc = ui_palette_scroll_offset(actions_above)
-	else
-		scroll_down.screen_loc = null
-		scroll_up.screen_loc = null
-
-	return ..()
-
-/datum/action_group/palette/ButtonNumberToScreenCoords(number, landing)
-	var/atom/movable/screen/button_palette/palette = owner.toggle_palette
-	if(palette.expanded)
-		return ..()
-
-	if(!landing)
-		return null
-
-	// We only render the landing in this case, so we force it to be the second item displayed (Second rather then first since it looks nicer)
-	// Remember the number var indexes at 0
-	return ..(1 + (row_offset * column_max), landing)
-
-
 /datum/action_group/listed
-	pixel_north_offset = 6
-	column_max = 10
+	column_max = 16
 	location = SCRN_OBJ_IN_LIST
 
-/datum/action_group/listed/refresh_actions()
-	. = ..()
-	owner.palette_actions.refresh_actions() // We effect them, so we gotta refresh em

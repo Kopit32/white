@@ -44,13 +44,13 @@
 #define O_LIGHTING_VISUAL_PLANE 11
 #define O_LIGHTING_VISUAL_RENDER_TARGET "O_LIGHT_VISUAL_PLANE"
 
-///Things that should render ignoring lighting
-#define ABOVE_LIGHTING_PLANE 12
-
 /// This plane masks out lighting to create an "emissive" effect, ie for glowing lights in otherwise dark areas.
 #define EMISSIVE_PLANE 14
 
 #define RENDER_PLANE_LIGHTING 15
+
+///Things that should render ignoring lighting
+#define ABOVE_LIGHTING_PLANE 16
 
 ///---------------- MISC -----------------------
 
@@ -192,8 +192,6 @@
 #define RAD_TEXT_PLANE 90
 
 //---------- LIGHTING -------------
-///Area appearances for the day night lighting effect
-#define DAY_NIGHT_LIGHTING_LAYER 100
 
 #define LIGHTING_PRIMARY_LAYER 15	//The layer for the main lights of the station
 #define LIGHTING_PRIMARY_DIMMER_LAYER 15.1	//The layer that dims the main lights of the station

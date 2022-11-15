@@ -21,7 +21,7 @@
 	var/datum/space_level/space_level = SSmapping.get_level(center_z)
 	space_level.generating = TRUE
 	_generate_space_ruin(center_x, center_y, center_z, border_x, border_y, linked_objective, forced_decoration, ruin_event)
-	space_level.generating = FALSE
+	space_level.finish_generating()
 
 /proc/_generate_space_ruin(center_x, center_y, center_z, border_x, border_y, datum/orbital_objective/linked_objective, forced_decoration, datum/ruin_event/ruin_event, allowed_flags = RUIN_PART_DEFAULT)
 
@@ -47,7 +47,7 @@
 		generator_settings = pick_weight(generator_settings_cache)
 
 	//We need doors
-	var/list/placed_room_entrances = list()
+	//var/list/placed_room_entrances = list()
 	var/list/placed_hallway_entrances = list()
 
 	var/list/room_connections = list()			//Assoc list of door connection coords, [x]_[y] = dir
@@ -228,7 +228,7 @@
 						message_admins("Trying to put a room connection at a hallway connection")
 					else
 						room_connections["[world_x]_[world_y]"] = ruin_part.connection_points[point] / 16
-						placed_room_entrances["[world_x]_[world_y]"] = ruin_part.connection_points[point] / 16
+						//placed_room_entrances["[world_x]_[world_y]"] = ruin_part.connection_points[point] / 16
 				else
 					if(room_connections.Find("[world_x]_[world_y]"))
 						message_admins("Trying to put a hallway connection at a room connection")
@@ -261,7 +261,7 @@
 			hallway_connections["[center_x]_[center_y]"] = SOUTH
 
 	//Lets place doors
-	for(var/door_pos in placed_room_entrances)
+/*	for(var/door_pos in placed_room_entrances)
 		var/splitextdoor = splittext(door_pos, "_")
 		var/turf/T = locate(text2num(splitextdoor[1]), text2num(splitextdoor[2]), center_z)
 		var/valid = isopenturf(T)
@@ -275,6 +275,7 @@
 			else
 				message_admins("Why the fuck is this thing [door_pos] have a direction of [placed_room_entrances[door_pos]]??? TELL ME!!!!")
 				valid = FALSE
+	Пожарные двери пока не нужны
 		if(valid)
 			new /obj/machinery/door/airlock/hatch(T)
 			switch(placed_room_entrances[door_pos])
@@ -288,9 +289,10 @@
 					var/obj/machinery/door/firedoor/border_only/b2 = new(T)
 					b1.setDir(EAST)
 					b2.setDir(WEST)
+*/
 
 	//Repopulate areas
-	repopulate_sorted_areas()
+	require_area_resort()
 
 	//Fill with shit
 	var/list/floortrash = generator_settings.get_floortrash()

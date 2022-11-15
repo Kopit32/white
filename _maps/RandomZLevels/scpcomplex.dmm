@@ -294,7 +294,7 @@
 	},
 /obj/effect/turf_decal/stripes/red/line,
 /obj/structure/cable,
-/turf/open/floor/vault,
+/turf/open/floor/plasteel/rockvault,
 /area/centcom/scp)
 "jk" = (
 /obj/effect/turf_decal/tile/neutral,
@@ -673,7 +673,7 @@
 	dir = 1
 	},
 /obj/structure/cable,
-/turf/open/floor/vault,
+/turf/open/floor/plasteel/rockvault,
 /area/centcom/scp)
 "CG" = (
 /obj/structure/chair{
@@ -1309,7 +1309,7 @@
 	},
 /obj/effect/turf_decal/stripes/red/line,
 /obj/structure/cable,
-/turf/open/floor/vault,
+/turf/open/floor/plasteel/rockvault,
 /area/centcom/scp)
 "ZW" = (
 /obj/effect/turf_decal/tile/neutral,

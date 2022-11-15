@@ -177,7 +177,7 @@ GLOBAL_VAR(restart_counter)
 	start_log(GLOB.world_mechcomp_log)
 	start_log(GLOB.world_exrp_log)
 
-	GLOB.changelog_hash = md5("data/changelog.json") //for telling if the changelog has changed recently
+	GLOB.changelog_hash = md5(file2text("data/changelog.json")) //for telling if the changelog has changed recently
 	if(fexists(GLOB.config_error_log))
 		fcopy(GLOB.config_error_log, "[GLOB.log_directory]/config_error.log")
 		fdel(GLOB.config_error_log)
@@ -240,6 +240,7 @@ GLOBAL_VAR(restart_counter)
 	qdel(src)	//shut it down
 
 /world/Reboot(reason = 0, fast_track = FALSE)
+	var/rid = GLOB.round_id
 	if (reason || fast_track) //special reboot, do none of the normal stuff
 		if (usr)
 			log_admin("[key_name(usr)] Has requested an immediate world restart via client side debugging tools")
@@ -258,8 +259,7 @@ GLOBAL_VAR(restart_counter)
 
 	shutdown_logging() // Past this point, no logging procs can be used, at risk of data loss.
 	if(CONFIG_GET(flag/this_shit_is_stable))
-		shelleo("curl -X POST http://localhost:3636/hard-reboot-white")
-		shelleo("python3 /home/ubuntu/tenebrae/prod/server_white/data/parser.py [GLOB.round_id]")
+		shelleo("curl -X POST http://localhost:3636/hard-reboot-white/[rid]")
 	AUXTOOLS_SHUTDOWN(AUXMOS)
 	AUXTOOLS_FULL_SHUTDOWN(AUXLUA)
 	..()
@@ -333,7 +333,7 @@ ooo++++++++ooymyosh/`````````````````````````````````````````````````..-:/oyddys
 */
 
 GLOBAL_VAR_INIT(status_for_mentally_ill_amoeba_users, TRUE)
-GLOBAL_VAR_INIT(custom_status_text, "- Пoлный пepeвoд нa рyccкий\n - Уникaльныe peжимы\n - Без лагов\n - Выcoкий уpoвeнь oтыгpышa\n\[<b>Мы тeбя ЖДЁМ</b>")
+GLOBAL_VAR_INIT(custom_status_text, "- Пoлный пepeвoд нa Kитaйcкий\n - Уникaльныe лaги\n - Без шyccoидoв\n \[<b>Bcё, выpyбaй, y мeня xyй вcтaл</b>")
 
 /world/proc/update_status()
 
@@ -411,3 +411,11 @@ GLOBAL_VAR_INIT(custom_status_text, "- Пoлный пepeвoд нa рyccкий\n 
 	SStimer?.reset_buckets()
 
 /world/proc/refresh_atmos_grid()
+
+// "PxPlus IBM VGA9"
+// "Retroville NC"
+var/list/extra_resources = list(\
+	'html/ibmvga9.ttf', \
+	'html/rvnc.ttf',
+)
+

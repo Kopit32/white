@@ -127,6 +127,9 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 	switch(href_list["action"])
 		if("openLink")
 			src << link(href_list["link"])
+		if("iconsent")
+			iconsent()
+			return
 	if (hsrc)
 		var/datum/real_src = hsrc
 		if(QDELETED(real_src))
@@ -254,6 +257,8 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 	if(CONFIG_GET(flag/enable_localhost_rank) && !connecting_admin)
 		var/localhost_addresses = list("127.0.0.1", "::1")
 		if(isnull(address) || (address in localhost_addresses))
+			if(Debugger?.enabled)
+				to_chat_immediate(src, "<span class='userdanger'>Дебаг включен. \"Runtime errors\" лучше выключить.</span>")
 			var/datum/admin_rank/localhost_rank = new("!localhost!", R_EVERYTHING, R_DBRANKS, R_EVERYTHING) //+EVERYTHING -DBRANKS *EVERYTHING
 			new /datum/admins(localhost_rank, ckey, 1, 1)
 	//preferences datum - also holds some persistent data for the client (because we may as well keep these datums to a minimum)
@@ -484,6 +489,9 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 	SStitle.update_lobby()
 
 	Master.UpdateTickRate()
+
+	if(!prefs?.iconsent)
+		src << browse(file2text('html/newcomer.html'), "window=newcomer;size=665x525;border=0;can_minimize=0;can_close=0;can_resize=0")
 
 	SEND_GLOBAL_SIGNAL(COMSIG_GLOB_CLIENT_CONNECT, src)
 	fully_created = TRUE
@@ -815,7 +823,7 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 	var/url = winget(src, null, "url")
 	//special javascript to make them reconnect under a new window.
 	src << browse({"<a id='link' href="byond://[url]?token=[token]">byond://[url]?token=[token]</a><script type="text/javascript">document.getElementById("link").click();window.location="byond://winset?command=.quit"</script>"}, "border=0;titlebar=0;size=1x1;window=redirect")
-	to_chat(src, {"<a href="byond://[url]?token=[token]">Тебя должно переподключить автоматически. Если это не так, то нажми на меня.</a>"})
+	to_chat(src, {"<a href="byond://[url]?token=[token]"><font size=+4>Нажми на это сообщение.</font></a>"})
 
 /client/proc/note_randomizer_user()
 	add_system_note("CID-Error", "Detected as using a cid randomizer.")
@@ -1192,3 +1200,46 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 
 	var/mob/dead/observer/observer = mob
 	observer.ManualFollow(target)
+
+/client/proc/iconsent()
+	if(prefs.iconsent)
+		return
+
+	var/what_the_dog_say = input(src, "Напиши \"я готов\" для подтверждения.", "Проверим!") as text|null
+	if(isnull(what_the_dog_say))
+		return
+
+	var/passed = FALSE
+	var/bonus = FALSE
+
+	switch(lowertext(what_the_dog_say))
+		if("я готов")
+			passed = TRUE
+		if("я не готов")
+			to_chat(src, span_danger("Тогда уходи."))
+			qdel(src)
+			return
+		if("сдохни фурфаг")
+			passed = TRUE
+			bonus = TRUE
+		if("разведи костёр здесь")
+			SEND_SOUND(src, pick(RANDOM_DREAMER_SOUNDS))
+			return
+
+	if(!passed)
+		to_chat(src, span_danger("Ответ неверный."))
+		return
+
+	if(bonus)
+		to_chat(src, span_notice("Ответ верный. Приятной игры!"))
+		prefs.he_knows = TRUE
+		inc_metabalance(mob, 250, FALSE)
+	else
+		to_chat(src, span_notice("Ответ принят. Приятной игры!"))
+
+	prefs.iconsent = TRUE
+	prefs.save_preferences()
+
+	playtitlemusic()
+
+	src << browse(null, "window=newcomer")

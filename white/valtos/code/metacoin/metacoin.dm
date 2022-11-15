@@ -71,6 +71,9 @@
 	if(!M.client || mc_count == 0)
 		return
 
+	if(GLOB.violence_mode_activated)
+		return
+
 	var/datum/db_query/query_inc_metacoins = SSdbcore.NewQuery(
 		"UPDATE player SET metacoins = metacoins + :mc_count WHERE ckey = :ckey",
 		list("mc_count" = mc_count, "ckey" = M.client.ckey)

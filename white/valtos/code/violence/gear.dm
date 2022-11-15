@@ -2,6 +2,7 @@
 GLOBAL_LIST_EMPTY(violence_gear_categories)
 GLOBAL_LIST_EMPTY(violence_gear_datums)
 
+// если товаров в магазине ещё нет, то генерирует их из всех возможных подтипов для текущего режима
 /proc/generate_violence_gear()
 	for(var/geartype in subtypesof(/datum/violence_gear))
 		var/datum/violence_gear/VG = new geartype
@@ -18,6 +19,7 @@ GLOBAL_LIST_EMPTY(violence_gear_datums)
 	GLOB.violence_gear_categories = sort_assoc(GLOB.violence_gear_categories)
 	return TRUE
 
+// генерируется автоматически, тебе определённо НЕ стоит это трогать
 /datum/violence_gear_category
 	var/cat = ""
 	var/list/gear = list()
@@ -27,11 +29,17 @@ GLOBAL_LIST_EMPTY(violence_gear_datums)
 	..()
 
 /datum/violence_gear
+	// название предмета в магазине
 	var/name = "???"
+	// название категории, создаётся автоматически
 	var/cat = "ХУЙ"
+	// стоимость. Если 0, то игнорируем
 	var/cost = 0
-	var/items = list()
-	var/sub_items = list()
+	// список предметов, которые будут выданы при раздаче
+	var/list/items = list()
+	// специальный тип для киберспейса
+	var/random_type = null
+	// список разрешённых тем, где можно купить это
 	var/list/allowed_themes = list()
 
 /datum/violence_gear/melee
@@ -116,7 +124,7 @@ GLOBAL_LIST_EMPTY(violence_gear_datums)
 		/obj/item/gun/ballistic/automatic/pistol/deagle,
 		/obj/item/ammo_box/magazine/m50
 	)
-	allowed_themes = list("std", "warfare", "hotline", "cyber")
+	allowed_themes = list("std", "warfare", "hotline")
 
 /datum/violence_gear/pistol/golden_eagle
 	name = "FTU PDH-6G"
@@ -342,7 +350,7 @@ GLOBAL_LIST_EMPTY(violence_gear_datums)
 	name = "Кевларовый щит"
 	cost = 300
 	items = list(/obj/item/shield/riot/kevlar)
-	allowed_themes = list("std", "warfare", "cyber")
+	allowed_themes = list("std", "warfare")
 
 /datum/violence_gear/misc
 	cat = "Различное"
@@ -351,12 +359,13 @@ GLOBAL_LIST_EMPTY(violence_gear_datums)
 	name = "Жгут"
 	cost = 25
 	items = list(/obj/item/stack/medical/suture/medicated)
-	allowed_themes = list("std", "warfare", "hotline")
+	allowed_themes = list("std", "warfare", "hotline", "katana", "portal")
 
 /datum/violence_gear/misc/sunglasses
 	name = "Солнцезащитные"
 	cost = 35
 	items = list(/obj/item/clothing/glasses/sunglasses)
+	allowed_themes = list("std", "warfare", "hotline", "katana", "portal")
 
 /datum/violence_gear/misc/wirecutters
 	name = "Кусачки"
@@ -379,6 +388,7 @@ GLOBAL_LIST_EMPTY(violence_gear_datums)
 	name = "Термалы"
 	cost = 1000
 	items = list(/obj/item/clothing/glasses/hud/toggle/thermal)
+	allowed_themes = list("std", "warfare", "hotline", "katana")
 
 /datum/violence_gear/ammo
 	cat = "Аммуниция"
@@ -460,3 +470,54 @@ GLOBAL_LIST_EMPTY(violence_gear_datums)
 	cost = 700
 	items = list(/obj/item/ammo_box/magazine/r40)
 	allowed_themes = list("katana")
+
+/datum/violence_gear/random
+	cat = "Случайное"
+
+/datum/violence_gear/random/food
+	name = "ЕДА"
+	cost = 25
+	random_type = /obj/item/food
+	allowed_themes = list("cyber")
+
+/datum/violence_gear/random/clothing
+	name = "ОДЕЖДА"
+	cost = 75
+	random_type = /obj/item/clothing
+	allowed_themes = list("cyber")
+
+/datum/violence_gear/random/book
+	name = "КНИГА"
+	cost = 100
+	random_type = /obj/item/book
+	allowed_themes = list("cyber")
+
+/datum/violence_gear/random/reagent_containers
+	name = "РЕАГЕНТ"
+	cost = 150
+	random_type = /obj/item/reagent_containers
+	allowed_themes = list("cyber")
+
+/datum/violence_gear/random/shield
+	name = "ЩИТ"
+	cost = 300
+	random_type = /obj/item/shield
+	allowed_themes = list("cyber")
+
+/datum/violence_gear/random/melee
+	name = "БЛИЖНИЙ БОЙ"
+	cost = 400
+	random_type = /obj/item/melee
+	allowed_themes = list("cyber")
+
+/datum/violence_gear/random/gun
+	name = "ДАЛЬНИЙ БОЙ"
+	cost = 600
+	random_type = /obj/item/gun
+	allowed_themes = list("cyber")
+
+/datum/violence_gear/random/mod
+	name = "MOD"
+	cost = 950
+	random_type = /obj/item/mod/control/pre_equipped
+	allowed_themes = list("cyber")

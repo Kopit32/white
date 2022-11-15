@@ -485,7 +485,7 @@
 	w_class = WEIGHT_CLASS_NORMAL
 	attack_verb_continuous = list("атакует", "режет", "втыкает", "рубит")
 	attack_verb_simple = list("атакует", "режет", "втыкает", "рубит")
-	hitsound = 'sound/weapons/bladeslice.ogg'
+	hitsound = 'sound/weapons/stab1.ogg'
 
 /*
  * Snap pops
@@ -797,7 +797,7 @@
 
 /obj/item/toy/clockwork_watch/examine(mob/user)
 	. = ..()
-	. += "<hr><span class='info'>Станционное время: [SSday_night.get_twentyfourhour_timestamp()]</span>"
+	. += "<hr><span class='info'>Станционное время: [station_time_timestamp()]</span>"
 
 /*
  * Toy Dagger

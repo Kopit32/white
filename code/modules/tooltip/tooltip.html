@@ -80,6 +80,11 @@
 		.operative .wrap {border-color: #1E0101;}
 		.operative .content {color: #FFFFFF; border-color: #750000; background-color: #350000;}
 
+		.trasen-knox .wrap {border-color: #998e81;}
+		.trasen-knox .content {color: #3ce375; border-color: #998e81; background-color: #1e1d21;}
+
+		.syndikats .wrap {border-color: #13121b;}
+		.syndikats .content {color: #b01232; border-color: #13121b; background-color: #282831;}
 
 	</style>
 </head>
@@ -112,6 +117,10 @@
 
 				//Some reset stuff to avoid fringe issues with sizing
 				window.location = 'byond://winset?id='+tooltip.control+';anchor1=0,0;size=999x999';
+
+				if (tooltip.special === "smol") {
+					tooltip.tileSize = 16;
+				}
 
 				//Get the real icon size according to the client view
 				//FYI, this bit is even more borrowed from goon, our widescreen broke tooltips so I took a look at how they do it
@@ -189,11 +198,6 @@
 							}
 						}
 					}
-				}
-
-				//Handle special cases (for fuck sake)
-				if (tooltip.special !== 'none') {
-					//Put yo special cases here
 				}
 
 				//Clamp values

@@ -161,6 +161,8 @@
 	for(var/m in GLOB.player_list)
 		if(ismob(m) && !isnewplayer(m))
 			var/mob/M = m
+			if(channel == CHANNEL_RUINATION_OST && M?.client && !(M.client.prefs.toggles & SOUND_COPYRIGHTED))
+				return
 			M.playsound_local(M, null, volume, vary, frequency, null, channel, pressure_affected, S)
 
 /mob/proc/stop_sound_channel(chan)
@@ -175,7 +177,9 @@
 	set waitfor = FALSE
 	UNTIL(SSticker.login_music) //wait for SSticker init to set the login music
 
-	if(prefs && (prefs.toggles & SOUND_LOBBY))
+	if(prefs && (prefs.toggles & SOUND_LOBBY) && prefs.iconsent)
+		spawn(10)
+			to_chat(src, "\n<center><b>Сейчас играет: <i>[replacetext(pop(splittext(SSticker.login_music, "/")), ".ogg", "")]</i></b></center>\n")
 		SEND_SOUND(src, sound(SSticker.login_music, repeat = TRUE, wait = 0, volume = vol, channel = CHANNEL_LOBBYMUSIC)) // MAD JAMS
 
 /proc/get_rand_frequency()
@@ -247,7 +251,7 @@
 			if("law_russian")
 				soundin = pick('white/valtos/sounds/beepsky_russian/god.ogg', 'white/valtos/sounds/beepsky_russian/iamthelaw.ogg', 'white/valtos/sounds/beepsky_russian/secureday.ogg', 'white/valtos/sounds/beepsky_russian/radio.ogg', 'white/valtos/sounds/beepsky_russian/insult.ogg', 'white/valtos/sounds/beepsky_russian/creep.ogg')
 			if("honkbot_e")
-				soundin = pick('sound/items/bikehorn.ogg', 'sound/items/AirHorn2.ogg', 'sound/misc/sadtrombone.ogg', 'sound/items/AirHorn.ogg', 'sound/effects/reee.ogg',  'sound/items/WEEOO1.ogg', 'sound/voice/beepsky/iamthelaw.ogg', 'sound/voice/beepsky/creep.ogg','sound/magic/Fireball.ogg' ,'sound/effects/pray.ogg', 'sound/voice/hiss1.ogg','white/valtos/sounds/error1.ogg', 'sound/machines/ping.ogg', 'sound/weapons/flashbang.ogg', 'sound/weapons/bladeslice.ogg')
+				soundin = pick('sound/items/bikehorn.ogg', 'sound/items/AirHorn2.ogg', 'sound/misc/sadtrombone.ogg', 'sound/items/AirHorn.ogg', 'sound/effects/reee.ogg',  'sound/items/WEEOO1.ogg', 'sound/voice/beepsky/iamthelaw.ogg', 'sound/voice/beepsky/creep.ogg','sound/magic/Fireball.ogg' ,'sound/effects/pray.ogg', 'sound/voice/hiss1.ogg','white/valtos/sounds/error1.ogg', 'sound/machines/ping.ogg', 'sound/weapons/flashbang.ogg', 'sound/weapons/stab2.ogg')
 			if("goose")
 				soundin = pick('sound/creatures/goose1.ogg', 'sound/creatures/goose2.ogg', 'sound/creatures/goose3.ogg', 'sound/creatures/goose4.ogg')
 			if("warpspeed")

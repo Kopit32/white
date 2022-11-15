@@ -26,7 +26,8 @@
 
 /datum/antagonist/combatant/red/on_gain()
 	. = ..()
-	GLOB.violence_red_team |= owner
+	LAZYREMOVE(GLOB.violence_blue_team, owner)
+	LAZYOR(GLOB.violence_red_team, owner)
 	var/datum/team/T = GLOB.violence_red_datum
 	if(T)
 		T.add_member(owner)
@@ -40,7 +41,8 @@
 
 /datum/antagonist/combatant/blue/on_gain()
 	. = ..()
-	GLOB.violence_blue_team |= owner
+	LAZYREMOVE(GLOB.violence_red_team, owner)
+	LAZYOR(GLOB.violence_blue_team, owner)
 	var/datum/team/T = GLOB.violence_blue_datum
 	if(T)
 		T.add_member(owner)
@@ -102,7 +104,6 @@
 	belt = null
 	ears = /obj/item/radio/headset
 	box = null
-	implants = list(/obj/item/implant/explosive/disintegrate)
 	var/team = "white"
 
 /datum/outfit/job/combantant/red
@@ -121,6 +122,13 @@
 
 /datum/outfit/job/combantant/pre_equip(mob/living/carbon/human/H)
 	..()
+
+	if(GLOB.violence_playmode == VIOLENCE_PLAYMODE_TAG)
+		ADD_TRAIT(H, TRAIT_CORPSELOCKED, "violence")
+
+	if(GLOB.violence_playmode != VIOLENCE_PLAYMODE_TAG)
+		implants = list(/obj/item/implant/explosive/disintegrate)
+
 	switch(GLOB.violence_theme)
 		if("katana")
 			if(GLOB.violence_current_round >= 6) // no chronos before
@@ -143,19 +151,21 @@
 
 /datum/outfit/job/combantant/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)
 	var/obj/item/card/id/W = H.wear_id
-	W.registered_name = H.real_name
-	W.update_label()
+	if(W)
+		W.registered_name = H.real_name
+		W.update_label()
 	var/obj/item/radio/R = H.ears
-	switch(team)
-		if("red")
-			R.set_frequency(FREQ_CTF_RED)
-			SSid_access.apply_trim_to_card(W, /datum/id_trim/combatant/red)
-		if("blue")
-			R.set_frequency(FREQ_CTF_BLUE)
-			SSid_access.apply_trim_to_card(W, /datum/id_trim/combatant/blue)
-	R.AddComponent(/datum/component/wearertargeting/earprotection, list(ITEM_SLOT_EARS))
-	R.freqlock = TRUE
-	R.independent = TRUE
+	if(R)
+		switch(team)
+			if("red")
+				R.set_frequency(FREQ_CTF_RED)
+				SSid_access.apply_trim_to_card(W, /datum/id_trim/combatant/red)
+			if("blue")
+				R.set_frequency(FREQ_CTF_BLUE)
+				SSid_access.apply_trim_to_card(W, /datum/id_trim/combatant/blue)
+		R.AddComponent(/datum/component/wearertargeting/earprotection, list(ITEM_SLOT_EARS))
+		R.freqlock = TRUE
+		R.independent = TRUE
 	H.sec_hud_set_ID()
 	// экипируем штуки спустя секунду, чтобы некоторый стаф не падал в нуллспейс случайно
 	spawn(1 SECONDS)

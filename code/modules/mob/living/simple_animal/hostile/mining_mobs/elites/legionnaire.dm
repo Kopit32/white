@@ -31,7 +31,7 @@
 	melee_damage_upper = 35
 	attack_verb_continuous = "дёргает своими руками задевая"
 	attack_verb_simple = "дёргает своими руками задевая"
-	attack_sound = 'sound/weapons/bladeslice.ogg'
+	attack_sound = 'sound/weapons/stab2.ogg'
 	attack_vis_effect = ATTACK_EFFECT_SLASH
 	throw_message = "doesn't affect the sturdiness of"
 	speed = 1
@@ -231,7 +231,7 @@
 	else
 		visible_message(span_boldwarning("[capitalize(src.name)] spews smoke from its maw!"))
 	var/datum/effect_system/fluid_spread/smoke/smoke = new
-	smoke.set_up(2, location = smoke_location)
+	smoke.set_up(2, holder = src, location = smoke_location)
 	smoke.start()
 
 //The legionnaire's head.  Basically the same as any legion head, but we have to tell our creator when we die so they can generate another head.

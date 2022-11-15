@@ -31,7 +31,7 @@
 /obj/item/soap/Initialize(mapload)
 	. = ..()
 	AddComponent(/datum/component/slippery, 80, paralyze = 20)
-	AddComponent(/datum/component/cleaner, cleanspeed, 0.1, on_cleaned_callback=CALLBACK(src, .proc/decreaseUses)) //less scaling for soapies
+	AddComponent(/datum/component/cleaner, cleanspeed, 0.1, pre_clean_callback=CALLBACK(src, .proc/should_clean), on_cleaned_callback=CALLBACK(src, .proc/decreaseUses)) //less scaling for soapies
 
 /obj/item/soap/examine(mob/user)
 	. = ..()
@@ -95,8 +95,13 @@
 /obj/item/soap/suicide_act(mob/user)
 	user.say(";FFFFFFFFFFFFFFFFUUUUUUUDGE!!", forced="soap suicide")
 	user.visible_message(span_suicide("[user] lifts [src] to [user.ru_ego()] mouth and gnaws on it furiously, producing a thick froth! [user.ru_who(TRUE)]'ll never get that BB gun now!"))
-	new /obj/effect/particle_effect/fluid/foam(loc)
+	var/datum/effect_system/fluid_spread/foam/foam = new
+	foam.set_up(1, holder = src, location = user.loc)
+	foam.start()
 	return (TOXLOSS)
+
+/obj/item/soap/proc/should_clean(datum/cleaning_source, atom/atom_to_clean, mob/living/cleaner)
+	return check_allowed_items(atom_to_clean)
 
 /**
  * Decrease the number of uses the bar of soap has.
@@ -116,21 +121,6 @@
 	if(uses <= 0)
 		to_chat(user, span_warning("[capitalize(src.name)] crumbles into tiny bits!"))
 		qdel(src)
-
-/obj/item/soap/afterattack(atom/target, mob/user, proximity)
-	. = ..()
-	if(!proximity || !check_allowed_items(target))
-		return
-	if(ishuman(target) && user.zone_selected == BODY_ZONE_PRECISE_MOUTH) //washing that potty mouth of yours
-		var/mob/living/carbon/human/human_user = user
-		user.visible_message(span_warning("<b>[capitalize(user)]</b> washes [target] mouth out with [src.name]!") , span_notice("You wash [target] mouth out with [src.name]!")) //washes mouth out with soap sounds better than 'the soap' here			if(user.zone_selected == "mouth")
-		if(human_user.lip_style)
-			user.mind?.adjust_experience(/datum/skill/cleaning, CLEAN_SKILL_GENERIC_WASH_XP)
-			human_user.lip_style = null //removes lipstick
-			human_user.update_body()
-		decreaseUses(src, target, user)
-		return
-	start_cleaning(src, target, user) //normal cleaning
 
 /*
  * Bike Horns

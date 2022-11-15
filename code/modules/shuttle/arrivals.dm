@@ -13,7 +13,6 @@
 
 	movement_force = list("KNOCKDOWN" = 3, "THROW" = 0)
 
-	var/sound_played
 	var/damaged	//too damaged to undock?
 	var/list/areas	//areas in our shuttle
 	var/list/queued_announces	//people coming in that we have to announce
@@ -37,7 +36,7 @@
 	//destination = SSshuttle.getDock("arrivals_endpoint")
 	areas = list()
 	var/list/new_latejoin = list()
-	for(var/area/shuttle/arrival/A in GLOB.sortedAreas)
+	for(var/area/shuttle/arrival/A in GLOB.areas)
 		for(var/obj/structure/chair/C in A)
 			new_latejoin += C
 		if(!console)

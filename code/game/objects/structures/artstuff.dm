@@ -171,9 +171,6 @@
 	generate_proper_overlay()
 	try_rename(user)
 
-	if(user.client)
-		inc_metabalance(user, METACOIN_ART_REWARD, reason="Новая картина!")
-
 /obj/item/canvas/proc/patron(mob/user)
 	if(!finalized || !isliving(user))
 		return
@@ -384,7 +381,7 @@
 /obj/item/wallframe/painting
 	name = "рамка картины"
 	desc = "Идеальная витрина для ваших любимых воспоминаний о смертельной ловушке."
-	icon = 'icons/obj/decals.dmi'
+	icon = 'icons/obj/signs.dmi'
 	custom_materials = list(/datum/material/wood = 2000)
 	flags_1 = NONE
 	icon_state = "frame-empty"
@@ -394,7 +391,7 @@
 /obj/structure/sign/painting
 	name = "Картина"
 	desc = "Искусство или \"Искусство\"? Выбирай."
-	icon = 'icons/obj/decals.dmi'
+	icon = 'icons/obj/signs.dmi'
 	icon_state = "frame-empty"
 	base_icon_state = "frame"
 	custom_materials = list(/datum/material/wood = 2000)

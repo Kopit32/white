@@ -6,7 +6,7 @@
 	var/datum/space_level/space_level = SSmapping.get_level(center_z)
 	space_level.generating = TRUE
 	_generate_asteroids(center_x, center_y, center_z, max_radius, weight_offset, scale)
-	space_level.generating = FALSE
+	space_level.finish_generating()
 
 /proc/_generate_asteroids(center_x, center_y, center_z, max_radius, weight_offset = 0, scale = 65)
 
@@ -18,7 +18,7 @@
 	var/list/high_value_turfs = list()
 	var/generated_string = rustg_cnoise_generate("45", "20", "4", "3", "[world.maxx]", "[world.maxy]") //Generate the raw CA data
 
-	var/static/area/asteroid_area = new /area/asteroid/generated()
+	var/area/asteroid_area = new /area/asteroid/generated()
 	for(var/turf/open/space/T in block(locate(1, 1, center_z), locate(world.maxx, world.maxy, center_z)))
 		if(!T)
 			continue
@@ -27,8 +27,11 @@
 		if(distance > max_radius)
 			continue
 		//Change area
+		var/area/old_area = T.loc
+		old_area.turfs_to_uncontain += T
+		asteroid_area.contained_turfs += T
 		asteroid_area.contents += T
-		T.transfer_area_lighting(T.loc, asteroid_area)
+		T.transfer_area_lighting(old_area, asteroid_area)
 		//Check if we are closed or not (Cave generation)
 		var/closed = text2num(generated_string[world.maxx * (T.y - 1) + T.x])
 		var/noise_at_coord = text2num(rustg_noise_get_at_coordinates("[seed]", "[T.x / perlin_noise_scale]", "[T.y / perlin_noise_scale]"))
